@@ -1,0 +1,85 @@
+Index: app/src/main/java/com/king/dexmorphhunter/db/methodDao.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/king/dexmorphhunter/db/methodDao.kt b/app/src/main/java/com/king/dexmorphhunter/db/methodDao.kt
+--- a/app/src/main/java/com/king/dexmorphhunter/db/methodDao.kt	
++++ b/app/src/main/java/com/king/dexmorphhunter/db/methodDao.kt	(date 1680450304053)
+@@ -4,6 +4,7 @@
+ import androidx.room.Insert
+ import androidx.room.OnConflictStrategy
+ import androidx.room.Query
++import com.king.dexmorphhunter.model.MethodInfo
+ 
+ @Dao
+ interface MethodDao {
+Index: app/src/main/java/com/king/dexmorphhunter/db/MethodDatabase.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/king/dexmorphhunter/db/MethodDatabase.kt b/app/src/main/java/com/king/dexmorphhunter/db/MethodDatabase.kt
+--- a/app/src/main/java/com/king/dexmorphhunter/db/MethodDatabase.kt	
++++ b/app/src/main/java/com/king/dexmorphhunter/db/MethodDatabase.kt	(date 1680449568900)
+@@ -7,6 +7,7 @@
+ import androidx.sqlite.db.SupportSQLiteDatabase
+ import kotlinx.coroutines.CoroutineScope
+ import kotlinx.coroutines.launch
++import java.lang.reflect.Method
+ 
+ @Database(entities = [Method::class], version = 1, exportSchema = false)
+ abstract class MethodDatabase : RoomDatabase() {
+Index: app/build/generated/source/buildConfig/debug/com/king/dexmorphhunter/BuildConfig.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/build/generated/source/buildConfig/debug/com/king/dexmorphhunter/BuildConfig.java b/app/build/generated/source/buildConfig/debug/com/king/dexmorphhunter/BuildConfig.java
+--- a/app/build/generated/source/buildConfig/debug/com/king/dexmorphhunter/BuildConfig.java	
++++ b/app/build/generated/source/buildConfig/debug/com/king/dexmorphhunter/BuildConfig.java	(date 1680449412294)
+@@ -1,0 +1,12 @@
++/**
++ * Automatically generated file. DO NOT MODIFY
++ */
++package com.king.dexmorphhunter;
++
++public final class BuildConfig {
++  public static final boolean DEBUG = Boolean.parseBoolean("true");
++  public static final String APPLICATION_ID = "com.king.dexmorphhunter";
++  public static final String BUILD_TYPE = "debug";
++  public static final int VERSION_CODE = 1;
++  public static final String VERSION_NAME = "1.0";
++}
+Index: app/build.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/build.gradle b/app/build.gradle
+--- a/app/build.gradle	
++++ b/app/build.gradle	(date 1680449568878)
+@@ -43,4 +43,6 @@
+     implementation 'com.google.android.material:material:1.8.0'
+     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.0'
++    implementation 'androidx.room:room-common:2.4.2'
++    implementation 'androidx.room:room-ktx:2.4.2'
+ }
+\ No newline at end of file
+Index: .idea/codeStyles/codeStyleConfig.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/codeStyles/codeStyleConfig.xml b/.idea/codeStyles/codeStyleConfig.xml
+new file mode 100644
+--- /dev/null	(date 1680449147958)
++++ b/.idea/codeStyles/codeStyleConfig.xml	(date 1680449147958)
+@@ -0,0 +1,5 @@
++<component name="ProjectCodeStyleConfiguration">
++  <state>
++    <option name="USE_PER_PROJECT_SETTINGS" value="true" />
++  </state>
++</component>
+\ No newline at end of file
