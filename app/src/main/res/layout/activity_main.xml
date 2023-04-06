@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--suppress ALL -->
 <layout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_layout"
     tools:context=".view.MainActivity">
 
     <data>
-        <import type="com.king.dexmorphhunter.viewmodel.MyViewModel" />
+        <import type="com.king.dexmorphhunter.viewmodel.AppListViewModel" />
         <variable
             name="viewModel"
-            type="MyViewModel" />
+            type="AppListViewModel" />
     </data>
 
     <LinearLayout
@@ -36,7 +35,7 @@
                 android:layout_width="192dp"
                 android:layout_height="wrap_content"
                 android:minHeight="48dp"
-                android:text="@string/intercepted_apps"
+                android:text="intercepted apps"
                 android:checked="@{viewModel.interceptedAppsSwitchChecked}"
                 android:onCheckedChanged="@{(buttonView, isChecked) -> viewModel.onInterceptedAppsSwitchCheckedChanged(isChecked)}"
                 tools:ignore="UseSwitchCompatOrMaterialXml" />
@@ -46,7 +45,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="48dp"
-                android:text="@string/system_apps"
+                android:text="system apps"
                 android:checked="@{viewModel.systemAppsSwitchChecked}"
                 android:onCheckedChanged="@{(buttonView, isChecked) -> viewModel.onSystemAppsSwitchCheckedChanged(isChecked)}"
                 tools:ignore="UseSwitchCompatOrMaterialXml,VisualLintButtonSize" />
@@ -55,7 +54,7 @@
 
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
+            android:id="@+id/appListView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"

@@ -1,0 +1,61 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="com.king.dexmorphhunter.model.AppInfo" />
+        <import type="com.king.dexmorphhunter.viewmodel.AppListViewModel" />
+        <variable
+            name="appInfo"
+            type="AppInfo" />
+        <variable
+            name="viewModel"
+            type="AppListViewModel" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp">
+
+        <ImageView
+            android:id="@+id/app_icon"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="4dp"
+            android:src="@{appInfo.appIcon}"
+            android:contentDescription="@string/icon_from_app" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="6dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/app_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{appInfo.appName}" />
+
+            <TextView
+                android:id="@+id/app_package"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{appInfo.packageName}" />
+
+        </LinearLayout>
+
+        <Switch
+            android:id="@+id/app_interception_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:checked="@{appInfo.isInterceptedApp}"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            android:onCheckedChanged="@{(buttonView, isChecked) -> viewModel.updateAppInterceptionStatus(appInfo, isChecked)}" />
+
+    </LinearLayout>
+</layout>

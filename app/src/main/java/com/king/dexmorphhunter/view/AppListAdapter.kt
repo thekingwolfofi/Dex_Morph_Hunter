@@ -2,51 +2,36 @@ package com.king.dexmorphhunter.view
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.king.dexmorphhunter.databinding.ItemAppBinding
 import com.king.dexmorphhunter.model.AppInfo
-import com.king.dexmorphhunter.databinding.AppListItemBinding
-import com.king.dexmorphhunter.viewmodel.MyViewModel
 
-class AppListAdapter(private val viewModel: MyViewModel) : RecyclerView.Adapter<AppListAdapter.ViewHolder>() {
+class AppListAdapter : RecyclerView.Adapter<AppListAdapter.ViewHolder>() {
+
+    private var appList: List<AppInfo> = listOf()
+
+    class ViewHolder(private val binding: ItemAppBinding) : RecyclerView.ViewHolder(binding.root) {
+
+        fun bind(appInfo: AppInfo) {
+            binding.appName.text = appInfo.appName
+            binding.appPackage.text = appInfo.packageName
+            binding.appIcon.setImageDrawable(appInfo.appIcon)
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val layoutInflater = LayoutInflater.from(parent.context)
-        val binding = AppListItemBinding.inflate(layoutInflater, parent, false)
+        val binding = ItemAppBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding)
     }
 
-    override fun getItemCount(): Int {
-        TODO("Not yet implemented")
-    }
-
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val appList = viewModel.getInstalledAppsList().value
-        val appInfo = appList?.get(position)
-
-        if (appInfo != null) {
-            holder.bind(appInfo)
-        }
+        holder.bind(appList[position])
     }
 
+    override fun getItemCount() = appList.size
 
-    inner class ViewHolder(private val binding: AppListItemBinding) : RecyclerView.ViewHolder(binding.root) {
-
-        fun bind(app: AppInfo) {
-            binding.appName.text = app.name
-            binding.appIcon.setImageDrawable(app.icon)
-            binding.appPackage.text = app.packageName
-        }
-    }
-
-}
-
-class AppInfoDiffCallback : DiffUtil.ItemCallback<AppInfo>() {
-    override fun areItemsTheSame(oldItem: AppInfo, newItem: AppInfo): Boolean {
-        return oldItem.packageName == newItem.packageName
-    }
-
-    override fun areContentsTheSame(oldItem: AppInfo, newItem: AppInfo): Boolean {
-        return oldItem == newItem
+    fun updateList(list: List<AppInfo>) {
+        appList = list
+        notifyDataSetChanged()
     }
 }

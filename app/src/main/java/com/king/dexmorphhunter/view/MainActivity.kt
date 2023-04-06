@@ -1,14 +1,17 @@
 package com.king.dexmorphhunter.view
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import com.king.dexmorphhunter.databinding.ActivityMainBinding
-import com.king.dexmorphhunter.viewmodel.MyViewModel
+import com.king.dexmorphhunter.viewmodel.AppListViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private val viewModel: MyViewModel by viewModels()
+    private val appListAdapter = AppListAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -16,24 +19,28 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setupSwitches()
+        val appListViewModel = ViewModelProvider(this).get(AppListViewModel::class.java)
 
-        val adapter = AppListAdapter(viewModel)
-        binding.recyclerView.adapter = adapter
+        appListViewModel.loadAppList(this)
 
-        viewModel.installedAppsList.observe(this) { appList ->
-            adapter.submitList(appList)
+        binding.appListView.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = appListAdapter
+            addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+            clipToPadding = false
+            setPadding(0, 16, 0, 16)
         }
 
-    }
+        appListViewModel.appList.observe(this) { appList ->
+            appListAdapter.updateList(appList)
+        }
 
-    private fun setupSwitches() {
         binding.interceptedAppsSwitch.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.onInterceptedAppsSwitchCheckedChanged(isChecked)
+            appListViewModel.onInterceptedAppsSwitchCheckedChanged(isChecked)
         }
+
         binding.systemAppsSwitch.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.onSystemAppsSwitchCheckedChanged(isChecked)
+            appListViewModel.onSystemAppsSwitchCheckedChanged(isChecked)
         }
-        viewModel.updateAppList()
     }
 }
