@@ -7,6 +7,7 @@ import com.king.dexmorphhunter.viewmodel.AppListViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.king.dexmorphhunter.view.adapter.AppListAdapter
 
 class MainActivity : AppCompatActivity() {
 

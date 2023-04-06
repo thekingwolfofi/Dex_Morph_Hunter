@@ -1,10 +1,10 @@
-package com.king.dexmorphhunter.view
+package com.king.dexmorphhunter.view.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.king.dexmorphhunter.databinding.ItemAppBinding
-import com.king.dexmorphhunter.model.AppInfo
+import com.king.dexmorphhunter.model.db.AppInfo
 
 class AppListAdapter : RecyclerView.Adapter<AppListAdapter.ViewHolder>() {
 
