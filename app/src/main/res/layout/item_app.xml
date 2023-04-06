@@ -2,11 +2,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-        <import type="com.king.dexmorphhunter.model.AppInfo" />
+        <import type="com.king.dexmorphhunter.model.db.AppInfo" />
         <import type="com.king.dexmorphhunter.viewmodel.AppListViewModel" />
         <variable
             name="appInfo"
-            type="AppInfo" />
+            type="com.king.dexmorphhunter.model.db.AppInfo" />
         <variable
             name="viewModel"
             type="AppListViewModel" />

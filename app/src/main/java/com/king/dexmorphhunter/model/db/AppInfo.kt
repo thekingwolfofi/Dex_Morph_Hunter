@@ -1,4 +1,4 @@
-package com.king.dexmorphhunter.model
+package com.king.dexmorphhunter.model.db
 
 import android.graphics.drawable.Drawable
 

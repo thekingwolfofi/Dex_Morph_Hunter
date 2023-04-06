@@ -12,7 +12,7 @@
         android:theme="@style/Theme.DexMorphHunter"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".view.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -20,6 +20,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".view.ActivityMethodSelect"
+            android:label="Select method" >
+        </activity>
+
         <meta-data
             android:name="xposedmodule"
             android:value="true" />
