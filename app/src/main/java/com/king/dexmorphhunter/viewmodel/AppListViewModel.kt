@@ -24,6 +24,7 @@ class AppListViewModel(private val appListModel: AppListModel) : ViewModel() {
         _appList.value = list
     }
 
+
     fun updateInterceptedApp(packageName: String, checked: Boolean) {
         appListModel.updateInterceptedApp(packageName, checked)
     }
