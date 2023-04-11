@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace 'com.king.dexmorphhunter'
-    compileSdk 28
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.king.dexmorphhunter"
         minSdk 28
-        targetSdk 33
+        targetSdk 31
         versionCode 1
         versionName "1.0"
 
@@ -33,13 +33,13 @@ android {
     buildFeatures{
         dataBinding true
     }
-    buildToolsVersion '30.0.3'
+    buildToolsVersion '33.0.2'
 }
 
 dependencies {
     implementation(files("libs/api-82.jar"))
-    implementation(files("libs/api-82-source.jar"))
-    implementation 'androidx.core:core-ktx:1.9.0'
+    implementation(files("libs/api-82-sources.jar"))
+    implementation 'androidx.core:core-ktx:1.10.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.8.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'

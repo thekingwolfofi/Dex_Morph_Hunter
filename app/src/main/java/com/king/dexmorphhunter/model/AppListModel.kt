@@ -1,28 +1,53 @@
 package com.king.dexmorphhunter.model
+
 import android.content.Context
-import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.content.pm.ResolveInfo
+import androidx.lifecycle.ViewModel
 import com.king.dexmorphhunter.model.db.AppInfo
 
-class AppListModel(private val context: Context) {
+class AppListModel(private val context: Context) : ViewModel() {
+    private var appList: List<AppInfo> = emptyList()
 
-    fun getAppList(context: Context): List<AppInfo> {
-        val pm: PackageManager = this.context.packageManager
-        val intent = Intent(Intent.ACTION_MAIN, null).apply {
-            addCategory(Intent.CATEGORY_LAUNCHER)
+    fun getInstalledApps(interceptedAppsChecked: Boolean, systemAppsChecked: Boolean, query: String?): List<AppInfo> {
+        val pm = context.packageManager
+        val packages = pm.getInstalledPackages(PackageManager.GET_META_DATA)
+        val filteredList = mutableListOf<AppInfo>()
+
+        for (pkg in packages) {
+            val appName = pm.getApplicationLabel(pkg.applicationInfo).toString()
+            val packageName = pkg.packageName
+            val isSystemApp = pkg.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0
+            val appIcon = pm.getApplicationIcon(pkg.applicationInfo)
+            val appInfo = AppInfo(packageName, appName, appIcon, isSystemApp, false)
+
+            if (query != null && query.isNotEmpty()) {
+                if (!appInfo.appName.contains(query, true) && !appInfo.packageName.contains(query, true)) {
+                    continue
+                }
+            }
+
+            if (interceptedAppsChecked && appInfo.isInterceptedApp) {
+                continue
+            }
+            if (systemAppsChecked && !appInfo.isSystemApp){
+                continue
+            }
+
+            filteredList.add(appInfo)
+
         }
-        val apps: List<ResolveInfo> = pm.queryIntentActivities(intent, 0)
-        val appList = mutableListOf<AppInfo>()
-        for (resolveInfo in apps) {
-            val packageName = resolveInfo.activityInfo.packageName
-            val appName = resolveInfo.loadLabel(pm).toString()
-            val appIcon = resolveInfo.loadIcon(pm)
-            val isSystemApp = (resolveInfo.activityInfo.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0
-            val isInterceptedApp = false
-            appList.add(AppInfo(packageName, appName, appIcon, isSystemApp, isInterceptedApp))
-        }
+
+        appList = filteredList
         return appList
+    }
+
+
+    fun updateInterceptedApp(packageName: String, checked: Boolean) {
+        appList.find { it.packageName == packageName }?.isInterceptedApp = checked
+    }
+
+    fun filter(newText: String?) {
+        TODO("Not yet implemented")
     }
 }

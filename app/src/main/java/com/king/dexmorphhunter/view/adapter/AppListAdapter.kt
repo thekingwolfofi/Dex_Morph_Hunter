@@ -1,37 +1,44 @@
 package com.king.dexmorphhunter.view.adapter
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.king.dexmorphhunter.databinding.ItemAppBinding
 import com.king.dexmorphhunter.model.db.AppInfo
+import com.king.dexmorphhunter.viewmodel.AppListViewModel
 
-class AppListAdapter : RecyclerView.Adapter<AppListAdapter.ViewHolder>() {
+class AppListAdapter(
+    private val context: Context,
+    private var appList: List<AppInfo>,
+    private val onInterceptedAppChanged: (packageName: String, checked: Boolean) -> Unit) : RecyclerView.Adapter<AppListAdapter.ViewHolder>() {
 
-    private var appList: List<AppInfo> = listOf()
+    class ViewHolder(private val itemBinding: ItemAppBinding, private val onInterceptedAppChanged: (packageName: String, checked: Boolean) -> Unit) : RecyclerView.ViewHolder(itemBinding.root) {
 
-    class ViewHolder(private val binding: ItemAppBinding) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(appInfo: AppInfo) {
-            binding.appName.text = appInfo.appName
-            binding.appPackage.text = appInfo.packageName
-            binding.appIcon.setImageDrawable(appInfo.appIcon)
-        }
-    }
+            itemBinding.appName.text = appInfo.appName
+            itemBinding.appPackage.text = appInfo.packageName
+            itemBinding.appIcon.setImageDrawable(appInfo.appIcon)
+            itemBinding.appInterceptionSwitch.isChecked = appInfo.isInterceptedApp
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = ItemAppBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ViewHolder(binding)
+            itemBinding.appInterceptionSwitch.setOnCheckedChangeListener { _, isChecked  ->
+                onInterceptedAppChanged(appInfo.packageName, isChecked)
+            }
+
+        }
+
     }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val itemBinding = ItemAppBinding.inflate(LayoutInflater.from(context), parent, false)
+        return ViewHolder(itemBinding,onInterceptedAppChanged)
+    }
+    override fun getItemCount(): Int = appList.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(appList[position])
+
+        val posAppInfo: AppInfo = appList[position]
+        holder.bind(posAppInfo)
     }
 
-    override fun getItemCount() = appList.size
-
-    fun updateList(list: List<AppInfo>) {
-        appList = list
-        notifyDataSetChanged()
-    }
 }

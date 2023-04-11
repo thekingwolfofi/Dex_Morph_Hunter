@@ -1,34 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main_layout"
     tools:context=".view.MainActivity">
 
-    <data>
-        <import type="com.king.dexmorphhunter.viewmodel.AppListViewModel" />
-        <variable
-            name="viewModel"
-            type="AppListViewModel" />
-    </data>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="16dp" >
 
-        <TextView
-            android:id="@+id/app_name_text_view"
+        <SearchView
+            android:id="@+id/search_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/app_name"
-            android:textAlignment="center"
-            android:textSize="24sp" />
+            android:iconifiedByDefault="false"
+            android:queryHint="Search for apps..."
+            app:iconifiedByDefault="false"
+            app:queryHint="Search for apps..." />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toTopOf="@id/recyclerView">
+            app:layout_constraintBottom_toTopOf="@id/app_list_recycler_view" >
 
             <Switch
                 android:id="@+id/intercepted_apps_switch"
@@ -36,8 +31,6 @@
                 android:layout_height="wrap_content"
                 android:minHeight="48dp"
                 android:text="intercepted apps"
-                android:checked="@{viewModel.interceptedAppsSwitchChecked}"
-                android:onCheckedChanged="@{(buttonView, isChecked) -> viewModel.onInterceptedAppsSwitchCheckedChanged(isChecked)}"
                 tools:ignore="UseSwitchCompatOrMaterialXml" />
 
             <Switch
@@ -46,18 +39,16 @@
                 android:layout_height="wrap_content"
                 android:minHeight="48dp"
                 android:text="system apps"
-                android:checked="@{viewModel.systemAppsSwitchChecked}"
-                android:onCheckedChanged="@{(buttonView, isChecked) -> viewModel.onSystemAppsSwitchCheckedChanged(isChecked)}"
                 tools:ignore="UseSwitchCompatOrMaterialXml,VisualLintButtonSize" />
 
         </LinearLayout>
 
-
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/appListView"
+            android:id="@+id/app_list_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:padding="8dp"/>
+            android:clipToPadding="true"
+            android:padding="8dp" />
     </LinearLayout>
+
 </layout>
