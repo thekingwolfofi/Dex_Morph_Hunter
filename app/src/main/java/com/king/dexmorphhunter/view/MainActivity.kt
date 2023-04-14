@@ -1,5 +1,7 @@
 package com.king.dexmorphhunter.view
 
+import android.annotation.SuppressLint
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -16,6 +18,7 @@ import com.king.dexmorphhunter.viewmodel.AppListViewModel
 import com.king.dexmorphhunter.viewmodel.AppListViewModelFactory
 import kotlinx.coroutines.*
 
+@Suppress("NAME_SHADOWING")
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
@@ -24,8 +27,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
 
     private var appList: List<AppInfo> = emptyList()
+    @SuppressLint("CommitPrefEdits")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val sharedPrefs = this.getSharedPreferences("app_cache", Context.MODE_PRIVATE)
 
         // Inicializa a view binding
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -33,8 +39,9 @@ class MainActivity : AppCompatActivity() {
 
         // Inicializa o ViewModel
         val appListModel = AppListModel(applicationContext)
-        val viewModelFactory = AppListViewModelFactory(appListModel)
+        val viewModelFactory = AppListViewModelFactory(applicationContext, appListModel)
         viewModel = ViewModelProvider(this, viewModelFactory)[AppListViewModel::class.java]
+
 
         // Carrega a lista de aplicativos
         //viewModel.loadInstalledAppList()
@@ -49,14 +56,14 @@ class MainActivity : AppCompatActivity() {
         // Observe as mudanças na lista de aplicativos
         viewModel.appList.observe(this) { newList ->
             appList = newList ?: emptyList()
-            adapter = AppListAdapter(this, appList, viewModel::updateInterceptedApp,viewModel::getBitmapFromPackage,viewModel::isSystemApp,viewModel::isInterceptedApp)
+            adapter = AppListAdapter(this, appList, viewModel::updateIsIntercepted,viewModel::getBitmapFromPackage)
             binding.appListRecyclerView.adapter = adapter
         }
 
-        val quary = binding.searchView.queryHint.toString()
-
-
         binding.interceptedAppsSwitch.setOnCheckedChangeListener { _, isChecked ->
+            val sharedPrefs = this.getSharedPreferences("app_cache", Context.MODE_PRIVATE)
+            val editor = sharedPrefs.edit()
+            editor.putBoolean("interceptedAppsSwitch",isChecked)
             val job = Job()
             val scope = CoroutineScope(Dispatchers.Main + job)
             scope.launch {
@@ -68,7 +75,14 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        val interceptedSwitchCache = sharedPrefs.getBoolean("interceptedAppsSwitch",false)
+
+        binding.interceptedAppsSwitch.isChecked = interceptedSwitchCache
+
         binding.systemAppsSwitch.setOnCheckedChangeListener { _, isChecked ->
+            val sharedPrefs = this.getSharedPreferences("app_cache", Context.MODE_PRIVATE)
+            val editor = sharedPrefs.edit()
+            editor.putBoolean("systemAppsSwitch",isChecked)
             val job = Job()
             val scope = CoroutineScope(Dispatchers.Main + job)
             scope.launch {
@@ -79,6 +93,11 @@ class MainActivity : AppCompatActivity() {
                 binding.progressBar.visibility = View.GONE
             }
         }
+
+
+        val systemSwitchCache = sharedPrefs.getBoolean("systemAppsSwitch",false)
+
+        binding.systemAppsSwitch.isChecked = systemSwitchCache
 
         progressBar = binding.progressBar
 
@@ -111,8 +130,8 @@ class MainActivity : AppCompatActivity() {
         val scope = CoroutineScope(Dispatchers.Main + job)
         scope.launch {
             binding.progressBar.visibility = View.VISIBLE
-            val appList = withContext(Dispatchers.Default) {
-                viewModel.loadInstalledAppList()
+            withContext(Dispatchers.Default) {
+                viewModel.getInstalledAppList()
             }
             binding.progressBar.visibility = View.GONE
         }

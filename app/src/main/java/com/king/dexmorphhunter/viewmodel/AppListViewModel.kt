@@ -1,77 +1,98 @@
 package com.king.dexmorphhunter.viewmodel
 
+import android.content.Context
 import android.graphics.drawable.Drawable
+import android.util.Log
 import androidx.lifecycle.*
-import com.king.dexmorphhunter.model.AppListModel
 import com.king.dexmorphhunter.model.db.AppInfo
+import com.king.dexmorphhunter.model.repository.AppRepository
+import com.king.dexmorphhunter.model.util.PackageUtils
 
-class AppListViewModel(private val appListModel: AppListModel) : ViewModel() {
+@Suppress("KotlinConstantConditions")
+class AppListViewModel(private val context: Context) : ViewModel() {
 
     private val _appList = MutableLiveData<List<AppInfo>>()
     val appList: LiveData<List<AppInfo>> = _appList
 
-    suspend fun loadInstalledAppList() {
-        _appList.postValue(appListModel.getInstalledAppList().value)
+    private var _filtredApps = MutableLiveData<List<AppInfo>>()
+
+    private val appRepository = AppRepository()
+
+
+    suspend fun getInstalledAppList() {
+        _appList.postValue(appRepository.getInstalledAppList(context))
+
     }
 
-    fun isSystemApp(packageName: String):Boolean{
-        return appListModel.isSystemApp(packageName)
-    }
-    fun isInterceptedApp(packageName: String):Boolean{
-        return appListModel.isInterceptedApp(packageName)
+    fun invalidateCache() {
+        appRepository.invalidateCache(context)
     }
 
+    fun isSystemApp( packageName: String):Boolean{
+        return appRepository.isSystemApp(context,packageName)
+    }
+
+
+    // Método para buscar ícone do aplicativo
     fun getBitmapFromPackage(packageName: String): Drawable {
-        return appListModel.getBitmapFromPackage(packageName)
+        return appRepository.getBitmapFromPackage(context, packageName)
     }
 
-
-    fun updateInterceptedApp(packageName: String, isIntercepted: Boolean) {
-        appListModel.updateIsIntercepted(packageName, isIntercepted)
-        //appListModel.extractMethodFromApp(packageName)
+    fun isInterceptedApp(packageName: String): Boolean {
+        return appRepository.isInterceptedApp(context,packageName)
     }
 
     suspend fun filterInterceptedApps(checked: Boolean) {
-        val list = appList.value?.let { appListModel.filterInterceptedApps(checked, it) }
-        if (list != null) {
-            if(list.size != _appList.value?.size ?: -1) {
-                _appList.postValue(list)
-            } else{
-                loadInstalledAppList()
-            }
+        _filtredApps.postValue( appRepository.getInstalledAppList(context) )
+        if (checked) {
+            _filtredApps.value?.let { appRepository.filterInterceptedApps(checked, it) }
+            _appList.postValue(_filtredApps.value)
+        }else{
+            _appList.postValue(_filtredApps.value)
         }
     }
 
-    suspend fun filterSystemApps(checked: Boolean) {
-        val list = appList.value?.let { appListModel.filterSystemApps(checked, it) }
-        if (list != null) {
-            if(list.size != _appList.value?.size ?: -1) {
-                _appList.postValue(list)
-            } else{
-                loadInstalledAppList()
-            }
+    suspend fun filterSystemApps(checked: Boolean){
+        _filtredApps.postValue(appRepository.getInstalledAppList(context))
+        if (checked) {
+            _filtredApps.value?.let { appRepository.filterSystemApps(context, checked, it) }
+            _appList.postValue(_filtredApps.value)
+        }else{
+            _appList.postValue(_filtredApps.value)
         }
     }
 
-
-    suspend fun filterApps(query: String?) {
-        val list = appListModel.filterApps( query,appList.value)
-
-        if (list != null) {
-            if(list.size == _appList.value?.size ?: 0) {
-                _appList.postValue(list)
-            } else{
-                loadInstalledAppList()
-            }
-        }
+    suspend fun filterApps(
+        query: String?
+    ){
+        _filtredApps.postValue(appRepository.getInstalledAppList(context))
+        val list = appRepository.filterApps(query, _filtredApps.value)
+        _appList.postValue(list)
     }
-    class Factory(private val appListModel: AppListModel) : ViewModelProvider.Factory {
+
+
+    fun updateIsIntercepted(packageName: String, isIntercepted: Boolean) {
+        appRepository.updateIsIntercepted(context, packageName, isIntercepted )
+    }
+
+    fun extractMethodFromApp(packageName: String) {
+        // Instancia a classe MethodInfoExtractModule e chama o método extractMethods
+        val listClasses = PackageUtils.getClassesInPackage(context,packageName)
+
+        // Faça o que precisar com a lista de nomes de método, por exemplo, imprimir no logcat
+        Log.d("MethodNames", "lista de classes " + listClasses.size)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    class Factory(private val context: Context) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(AppListViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
-                return AppListViewModel(appListModel) as T
+                return AppListViewModel(context) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")
         }
     }
+
+
 }

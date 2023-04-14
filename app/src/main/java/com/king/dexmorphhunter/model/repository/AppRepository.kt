@@ -1,132 +1,88 @@
 package com.king.dexmorphhunter.model.repository
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.king.dexmorphhunter.model.db.AppInfo
 import com.king.dexmorphhunter.model.util.Constants
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
+import java.util.*
+import android.util.Base64
 
-class AppRepository() : ViewModel() {
+class AppRepository : ViewModel() {
 
-    private val packageCache = MutableStateFlow(mutableMapOf<String, AppInfo>())
+    private val mRefreshing = MutableSharedFlow<Boolean>(replay = 1)
 
-    val mRefreshing = MutableSharedFlow<Boolean>(replay = 1)
-
-    private val mAppList = MutableSharedFlow<MutableList<String>>(replay = 1)
-
-    var reloadCache = false
-
-    suspend fun getInstalledAppList(context: Context): LiveData<List<AppInfo>> = withContext(Dispatchers.Main){
-        val sharedPrefs = context.getSharedPreferences("dexApplication", Context.MODE_PRIVATE)
-        reloadCache = sharedPrefs.getBoolean("reloadCache", true)
-
-        val mAppList = MutableLiveData<List<AppInfo>>()
-        //invalidateCache(context)
-        /*if (reloadCache) {*/
-            val pm: PackageManager by lazy { context.packageManager }
-            val editor = sharedPrefs.edit()
-
+    @SuppressLint("QueryPermissionsNeeded")
+    @Suppress("DEPRECATION")
+    suspend fun getInstalledAppList(context: Context): List<AppInfo> = withContext(Dispatchers.Main){
+        val sharedPrefs = context.getSharedPreferences("app_cache", Context.MODE_PRIVATE)
+        val mAppList: MutableList<AppInfo>
+        val reloadCache = sharedPrefs.getBoolean("cachedApps", false)
+        if (!reloadCache) {
+            val pm: PackageManager by lazy { context.packageManager}
             val appList: MutableList<AppInfo> = mutableListOf()
-            val cacheList: MutableList<String> = mutableListOf()
             mRefreshing.emit(true)
             withContext(Dispatchers.IO) {
                 val packages = pm.getInstalledPackages(0)
                 for (packageInfo in packages) {
                     val appName = pm.getApplicationLabel(packageInfo.applicationInfo).toString()
-                    appList.add(AppInfo(packageInfo.packageName, appName))
-                    cacheList.add(packageInfo.packageName)
+                    val isSystem = isSystemApp(context,packageInfo.packageName)
+                    appList.add(AppInfo(packageInfo.packageName, appName,null,isSystem,false))
+                    // Salva o cache no SharedPreferences
+                    cacheAppInfo(context, AppInfo(packageInfo.packageName,appName))
                 }
             }
 
             mRefreshing.emit(false)
-            // Salva o cache no SharedPreferences
-            editor.putStringSet("packageCache", cacheList.toSet())
-            editor.putBoolean("reloadCache", false)
-            editor.apply()
-            //val appListCache =
-            mAppList.postValue(appList)
+
+            mAppList = appList
             return@withContext mAppList
-        /*}else {
-            // Carrega a lista do cache
-            //val appListCache = Gson().fromJson(sharedPrefs.getString("packageCache", ""), Array<AppInfo>::class.java).toList()
-            val cache = getAppInfoFromCache(context)
-            mAppList.postValue(cache)
+        }else {
+            val cache = getCachedAppList(context)
+            mAppList = cache
             return@withContext mAppList
         }
-         */
 
     }
-
-    /*
-    private fun getAppInfoFromCache(context: Context): List<AppInfo> {
-        val pm: PackageManager by lazy { context.packageManager }
-        val sharedPrefs = context.getSharedPreferences("dexApplication", Context.MODE_PRIVATE)
-
-        val appList = mutableListOf<AppInfo>()
-        sharedPrefs.getStringSet("packageCache", emptySet())?.let { cachedPackages ->
-            cachedPackages.forEach { cachedPackageName ->
-                val packageName = cachedPackageName.toString()
-                val packageInfo = pm.getPackageInfo(packageName, 0)
-                val appName = pm.getApplicationLabel(packageInfo.applicationInfo).toString()
-                //val icon = pm.getApplicationIcon(packageInfo.applicationInfo)
-                //val isSystemApp = packageName in Constants.importantPackagesList || packageInfo.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0
-                //val isIntercepted = sharedPrefs.getBoolean(packageName, false)
-                appList.add(AppInfo(packageName, appName))
-
-            }
-        }
-        return appList
-    }
-     */
 
     fun updateIsIntercepted(context: Context, packageName: String, isIntercepted: Boolean) {
-        val sharedPrefs = context.getSharedPreferences("dexApplication", Context.MODE_PRIVATE)
+        val sharedPrefs = context.getSharedPreferences("app_cache", Context.MODE_PRIVATE)
         val editor = sharedPrefs.edit()
-        editor.putBoolean(packageName, isIntercepted)
+        editor.putBoolean("${packageName}_intercepted_app", isIntercepted)
         editor.apply()
     }
 
-
+    @Suppress("DEPRECATION")
     fun invalidateCache(context: Context) {
-        val pm: PackageManager by lazy { context.packageManager }
-        val sharedPrefs = context.getSharedPreferences("dexApplication", Context.MODE_PRIVATE)
+        val sharedPrefs = context.getSharedPreferences("app_cache", Context.MODE_PRIVATE)
         val editor = sharedPrefs.edit()
 
         viewModelScope.launch {
-            mRefreshing.emit(true)
-            val cache = withContext(Dispatchers.IO) {
-                val packages = pm.getInstalledPackages(0)
-                mutableMapOf<String, AppInfo>().also {
-                    for (packageInfo in packages) {
-                        val label = pm.getApplicationLabel(packageInfo.applicationInfo).toString()
-                        it[packageInfo.packageName] = AppInfo(packageInfo.packageName, label)
-                    }
-                }
-            }
-            packageCache.emit(cache) //essa linha
-            mAppList.emit(cache.keys.toMutableList())
-            mRefreshing.emit(false)
-            editor.putStringSet("packageCache", cache.keys.toSet())
+            editor.clear()
             editor.apply()
+
         }
     }
 
+    @Suppress("DEPRECATION")
     fun getBitmapFromPackage(context: Context, packageName: String): Drawable {
         val pm = context.packageManager
         val applicationInfo = pm.getApplicationInfo(packageName, 0)
         return pm.getApplicationIcon(applicationInfo)
     }
 
+    @Suppress("DEPRECATION")
     fun isSystemApp(context: Context, packageName: String): Boolean {
         val pm = context.packageManager
         val applicationInfo = pm.getApplicationInfo(packageName, 0)
@@ -134,30 +90,111 @@ class AppRepository() : ViewModel() {
     }
 
     fun isInterceptedApp(context: Context, packageName: String): Boolean {
-        val sharedPrefs = context.getSharedPreferences("dexApplication", Context.MODE_PRIVATE)
+        val sharedPrefs = context.getSharedPreferences("app_cache", Context.MODE_PRIVATE)
         return sharedPrefs.getBoolean(packageName, false)
     }
 
     fun filterInterceptedApps(checked: Boolean, appList: List<AppInfo>): List<AppInfo> {
-        return appList?.filter { it.appIsIntercepted == checked } ?: emptyList()
+        return appList.filter {
+            it.appIsIntercepted == checked
+        }.sortedBy { it.appName }
     }
 
-    fun filterSystemApps(context: Context ,checked: Boolean, appList: List<AppInfo>): List<AppInfo>? {
-        return appList?.filter { isSystemApp(context,it.packageName) } ?: emptyList()
+    fun filterSystemApps(context: Context, checked: Boolean, appList: List<AppInfo>): List<AppInfo> {
+        return appList.filter { isSystemApp(context,it.packageName) == checked }.sortedBy { it.appName }
     }
 
     fun filterApps(
         query: String?,
         appList: List<AppInfo>?
     ): List<AppInfo>? {
-        return if (query != null) {
-            appList?.filter {
-                (it.packageName in query ||
-                        it.appName in query)
-            }?:emptyList()
-        } else{
-            appList
+        return appList?.filter {
+            val appName = it.appName.lowercase(Locale.getDefault())
+            val packageName = it.packageName.lowercase(Locale.getDefault())
+            query?.let { q ->
+                appName.contains(q.lowercase(Locale.getDefault())) ||
+                        packageName.contains(q.lowercase(Locale.getDefault()))
+            } ?: true
+        }?.sortedBy { it.appName }
+    }
+
+    private fun cacheAppInfo(context: Context, appInfo: AppInfo) {
+        val prefs = context.getSharedPreferences("app_cache", Context.MODE_PRIVATE)
+        var editor = prefs.edit()
+        editor.putString("${appInfo.packageName}_package", appInfo.packageName)
+        editor.putString("${appInfo.packageName}_name", appInfo.appName)
+        editor.putString("${appInfo.packageName}_icon", encodeBitmap(appInfo.appIcon))
+        editor.putBoolean(
+            "${appInfo.packageName}_system_app",
+            appInfo.appIsSystemApp ?: isSystemApp(context,appInfo.packageName)
+        )
+        editor.putBoolean(
+            "${appInfo.packageName}_intercepted_app",
+            appInfo.appIsIntercepted ?: isInterceptedApp(context,appInfo.packageName)
+        )
+        editor.apply()
+        val sharedPrefs = context.getSharedPreferences("app_cache", Context.MODE_PRIVATE)
+        editor = sharedPrefs.edit()
+        editor.putBoolean("cachedApps",true)
+        editor.apply()
+    }
+
+    private fun getCachedAppList(context: Context): MutableList<AppInfo> {
+        val appList = mutableListOf<AppInfo>()
+        val prefs = context.getSharedPreferences("app_cache", Context.MODE_PRIVATE)
+        prefs.getBoolean("interceptedAppsSwitch",false)
+        prefs.getBoolean("systemAppsSwitch",false)
+        val packages = prefs.all.keys.filter { it.endsWith("_package") }.map { it.removeSuffix("_package") }
+        for (pkgName in packages) {
+            val packageName = prefs.getString("${pkgName}_package",null)
+            val name = prefs.getString("${pkgName}_name", null)
+            val iconStr = prefs.getString("${pkgName}_icon", null)
+            val isSystemApp = prefs.getBoolean("${pkgName}_system_app", false)
+            val isIntercepted = prefs.getBoolean("${pkgName}_intercepted_app", false)
+            val icon = decodeBitmap(iconStr)
+            appList.add(AppInfo(packageName!!, name!!, icon, isSystemApp, isIntercepted))
         }
+        return appList
+    }
+
+
+    fun getCachedAppInfo(context: Context, packageName: String): AppInfo? {
+        val sharedPrefs = context.getSharedPreferences("app_cache", Context.MODE_PRIVATE)
+        val cached = sharedPrefs.getBoolean("cachedApps", false)
+        if (cached) {
+            val prefs = context.getSharedPreferences("app_cache", Context.MODE_PRIVATE)
+            val appName = prefs.getString("${packageName}_name", null)
+            val iconString = prefs.getString("${packageName}_icon", null)
+            val isSystemApp = prefs.getBoolean("${packageName}_system_app", false)
+            val isInterceptedApp = prefs.getBoolean("${packageName}_intercepted_app", false)
+            val icon = if (iconString != null) decodeBitmap(iconString) else null
+            return if (appName != null) AppInfo(
+                packageName,
+                appName,
+                icon,
+                isSystemApp,
+                isInterceptedApp
+            ) else null
+        }
+        return null
+    }
+
+    private fun encodeBitmap(bitmap: Bitmap?): String? {
+        if (bitmap == null) {
+            return null
+        }
+        val stream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        val byteArray = stream.toByteArray()
+        return Base64.encodeToString(byteArray, Base64.DEFAULT)
+    }
+
+    private fun decodeBitmap(bitmapString: String?): Bitmap? {
+        if (bitmapString == null) {
+            return null
+        }
+        val byteArray = Base64.decode(bitmapString, Base64.DEFAULT)
+        return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
     }
 
 }
