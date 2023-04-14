@@ -14,13 +14,17 @@ class AppListAdapter(
     private val context: Context,
     private var appList: List<AppInfo>,
     private val onInterceptedAppChanged: (packageName: String, checked: Boolean) -> Unit,
-    private val getBitmapFromPackage: (packageName: String) -> Drawable
+    private val getBitmapFromPackage: (packageName: String) -> Drawable,
+    private val isSystemApp: (packageName: String) -> Boolean,
+    private val isInterceptedApp: (packageName: String) -> Boolean
 ) : RecyclerView.Adapter<AppListAdapter.ViewHolder>() {
 
     class ViewHolder(
         private val itemBinding: ItemAppBinding,
         private val onInterceptedAppChanged: (packageName: String, checked: Boolean) -> Unit,
-        private val getBitmapFromPackage: (packageName: String) -> Drawable
+        private val getBitmapFromPackage: (packageName: String) -> Drawable,
+        private val isSystemApp: (packageName: String) -> Boolean,
+        private val isInterceptedApp: (packageName: String) -> Boolean
     ) : RecyclerView.ViewHolder(itemBinding.root) {
 
 
@@ -39,7 +43,7 @@ class AppListAdapter(
     }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val itemBinding = ItemAppBinding.inflate(LayoutInflater.from(context), parent, false)
-        return ViewHolder(itemBinding,onInterceptedAppChanged,getBitmapFromPackage)
+        return ViewHolder(itemBinding,onInterceptedAppChanged,getBitmapFromPackage,isSystemApp,isInterceptedApp)
     }
     override fun getItemCount(): Int = appList.size
 

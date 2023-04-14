@@ -1,7 +1,6 @@
 package com.king.dexmorphhunter.model
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -75,6 +74,11 @@ class AppListModel(private val context: Context) : ViewModel() {
     }
     */
 
+    fun isSystemApp( packageName: String):Boolean{
+        return appRepository.isSystemApp(context,packageName)
+    }
+
+
     // Método para buscar ícone do aplicativo
     fun getBitmapFromPackage(packageName: String): Drawable {
         return appRepository.getBitmapFromPackage(context, packageName)
@@ -87,6 +91,25 @@ class AppListModel(private val context: Context) : ViewModel() {
 
         // Faça o que precisar com a lista de nomes de método, por exemplo, imprimir no logcat
         Log.d("MethodNames", "lista de classes " + listClasses.size)
+    }
+
+    fun isInterceptedApp(packageName: String): Boolean {
+        return appRepository.isInterceptedApp(context,packageName)
+    }
+
+    fun filterInterceptedApps(checked: Boolean, appList: List<AppInfo>?): List<AppInfo>? {
+        return appList?.let { appRepository.filterInterceptedApps(checked, it) }
+    }
+
+    fun filterSystemApps(checked: Boolean, appList: List<AppInfo>?): List<AppInfo>? {
+        return appList?.let { appRepository.filterSystemApps(context,checked, it) }
+    }
+
+    fun filterApps(
+        query: String?,
+        appList: List<AppInfo>?
+    ): List<AppInfo>? {
+        return appRepository.filterApps( query, appList)
     }
 
 }

@@ -3,13 +3,11 @@ package com.king.dexmorphhunter.model.repository
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.gson.Gson
 import com.king.dexmorphhunter.model.db.AppInfo
 import com.king.dexmorphhunter.model.util.Constants
 import kotlinx.coroutines.Dispatchers
@@ -17,8 +15,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
 
 class AppRepository() : ViewModel() {
 
@@ -131,6 +127,38 @@ class AppRepository() : ViewModel() {
         return pm.getApplicationIcon(applicationInfo)
     }
 
+    fun isSystemApp(context: Context, packageName: String): Boolean {
+        val pm = context.packageManager
+        val applicationInfo = pm.getApplicationInfo(packageName, 0)
+        return packageName in Constants.importantPackagesList || applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0
+    }
+
+    fun isInterceptedApp(context: Context, packageName: String): Boolean {
+        val sharedPrefs = context.getSharedPreferences("dexApplication", Context.MODE_PRIVATE)
+        return sharedPrefs.getBoolean(packageName, false)
+    }
+
+    fun filterInterceptedApps(checked: Boolean, appList: List<AppInfo>): List<AppInfo> {
+        return appList?.filter { it.appIsIntercepted == checked } ?: emptyList()
+    }
+
+    fun filterSystemApps(context: Context ,checked: Boolean, appList: List<AppInfo>): List<AppInfo>? {
+        return appList?.filter { isSystemApp(context,it.packageName) } ?: emptyList()
+    }
+
+    fun filterApps(
+        query: String?,
+        appList: List<AppInfo>?
+    ): List<AppInfo>? {
+        return if (query != null) {
+            appList?.filter {
+                (it.packageName in query ||
+                        it.appName in query)
+            }?:emptyList()
+        } else{
+            appList
+        }
+    }
 
 }
 

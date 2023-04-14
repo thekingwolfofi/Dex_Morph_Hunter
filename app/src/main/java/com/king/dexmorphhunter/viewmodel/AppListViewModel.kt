@@ -1,14 +1,9 @@
 package com.king.dexmorphhunter.viewmodel
 
-import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import androidx.lifecycle.*
 import com.king.dexmorphhunter.model.AppListModel
 import com.king.dexmorphhunter.model.db.AppInfo
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 class AppListViewModel(private val appListModel: AppListModel) : ViewModel() {
 
@@ -16,12 +11,14 @@ class AppListViewModel(private val appListModel: AppListModel) : ViewModel() {
     val appList: LiveData<List<AppInfo>> = _appList
 
     suspend fun loadInstalledAppList() {
-            _appList.postValue(appListModel.getInstalledAppList().value)
+        _appList.postValue(appListModel.getInstalledAppList().value)
     }
 
-    fun filterApps(interceptedAppsChecked: Boolean, systemAppsChecked: Boolean, query: String?) {
-        //val list = appListModel.getInstalledApps(interceptedAppsChecked, systemAppsChecked, query)
-        //_appList.value = list
+    fun isSystemApp(packageName: String):Boolean{
+        return appListModel.isSystemApp(packageName)
+    }
+    fun isInterceptedApp(packageName: String):Boolean{
+        return appListModel.isInterceptedApp(packageName)
     }
 
     fun getBitmapFromPackage(packageName: String): Drawable {
@@ -34,6 +31,40 @@ class AppListViewModel(private val appListModel: AppListModel) : ViewModel() {
         //appListModel.extractMethodFromApp(packageName)
     }
 
+    suspend fun filterInterceptedApps(checked: Boolean) {
+        val list = appList.value?.let { appListModel.filterInterceptedApps(checked, it) }
+        if (list != null) {
+            if(list.size != _appList.value?.size ?: -1) {
+                _appList.postValue(list)
+            } else{
+                loadInstalledAppList()
+            }
+        }
+    }
+
+    suspend fun filterSystemApps(checked: Boolean) {
+        val list = appList.value?.let { appListModel.filterSystemApps(checked, it) }
+        if (list != null) {
+            if(list.size != _appList.value?.size ?: -1) {
+                _appList.postValue(list)
+            } else{
+                loadInstalledAppList()
+            }
+        }
+    }
+
+
+    suspend fun filterApps(query: String?) {
+        val list = appListModel.filterApps( query,appList.value)
+
+        if (list != null) {
+            if(list.size == _appList.value?.size ?: 0) {
+                _appList.postValue(list)
+            } else{
+                loadInstalledAppList()
+            }
+        }
+    }
     class Factory(private val appListModel: AppListModel) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(AppListViewModel::class.java)) {

@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
         // Observe as mudanças na lista de aplicativos
         viewModel.appList.observe(this) { newList ->
             appList = newList ?: emptyList()
-            adapter = AppListAdapter(this, appList, viewModel::updateInterceptedApp,viewModel::getBitmapFromPackage)
+            adapter = AppListAdapter(this, appList, viewModel::updateInterceptedApp,viewModel::getBitmapFromPackage,viewModel::isSystemApp,viewModel::isInterceptedApp)
             binding.appListRecyclerView.adapter = adapter
         }
 
@@ -57,24 +57,45 @@ class MainActivity : AppCompatActivity() {
 
 
         binding.interceptedAppsSwitch.setOnCheckedChangeListener { _, isChecked ->
-            loadApps()
-
+            val job = Job()
+            val scope = CoroutineScope(Dispatchers.Main + job)
+            scope.launch {
+                binding.progressBar.visibility = View.VISIBLE
+                withContext(Dispatchers.Default) {
+                    viewModel.filterInterceptedApps(isChecked)
+                }
+                binding.progressBar.visibility = View.GONE
+            }
         }
 
         binding.systemAppsSwitch.setOnCheckedChangeListener { _, isChecked ->
-            //viewModel.loadInstalledAppList()
+            val job = Job()
+            val scope = CoroutineScope(Dispatchers.Main + job)
+            scope.launch {
+                binding.progressBar.visibility = View.VISIBLE
+                withContext(Dispatchers.Default) {
+                    viewModel.filterSystemApps(isChecked)
+                }
+                binding.progressBar.visibility = View.GONE
+            }
         }
 
         progressBar = binding.progressBar
-    /*
+
         binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener,
             android.widget.SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                viewModel.filterApps(
-                    binding.interceptedAppsSwitch.isChecked,
-                    binding.systemAppsSwitch.isChecked,
-                    query
-                )
+                val job = Job()
+                val scope = CoroutineScope(Dispatchers.Main + job)
+                scope.launch {
+                    binding.progressBar.visibility = View.VISIBLE
+                    withContext(Dispatchers.Default) {
+                        viewModel.filterApps(
+                            query
+                        )
+                    }
+                    binding.progressBar.visibility = View.GONE
+                }
                 return true
             }
 
@@ -82,7 +103,6 @@ class MainActivity : AppCompatActivity() {
                 return false
             }
         })
-    */
 
     }
 
