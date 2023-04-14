@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.king.dexmorphhunter.model.repository.AppRepository
+import kotlinx.coroutines.runBlocking
 
 class PackageRemovedReceiver : BroadcastReceiver() {
 
@@ -13,7 +14,9 @@ class PackageRemovedReceiver : BroadcastReceiver() {
             val sharedPrefs = context.getSharedPreferences("app_cache", Context.MODE_PRIVATE)
             val editor = sharedPrefs.edit()
             editor.putBoolean("cachedApps",false)
-            appRepository.invalidateCache(context)
+            runBlocking {
+                appRepository.invalidateCache(context)
+            }
         }
     }
 }

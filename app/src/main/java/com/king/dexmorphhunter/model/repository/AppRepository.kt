@@ -12,16 +12,14 @@ import androidx.lifecycle.viewModelScope
 import com.king.dexmorphhunter.model.db.AppInfo
 import com.king.dexmorphhunter.model.util.Constants
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.util.*
 import android.util.Base64
+import com.king.dexmorphhunter.model.App
 
 class AppRepository : ViewModel() {
-
-    private val mRefreshing = MutableSharedFlow<Boolean>(replay = 1)
 
     @SuppressLint("QueryPermissionsNeeded")
     @Suppress("DEPRECATION")
@@ -32,10 +30,15 @@ class AppRepository : ViewModel() {
         if (!reloadCache) {
             val pm: PackageManager by lazy { context.packageManager}
             val appList: MutableList<AppInfo> = mutableListOf()
-            mRefreshing.emit(true)
             withContext(Dispatchers.IO) {
                 val packages = pm.getInstalledPackages(0)
                 for (packageInfo in packages) {
+                    if(pm.getApplicationLabel(packageInfo.applicationInfo).toString() in Constants.removePackage){
+                        continue
+                    }
+                    if(packageInfo.packageName in Constants.importantPackagesList){
+                        continue
+                    }
                     val appName = pm.getApplicationLabel(packageInfo.applicationInfo).toString()
                     val isSystem = isSystemApp(context,packageInfo.packageName)
                     appList.add(AppInfo(packageInfo.packageName, appName,null,isSystem,false))
@@ -43,8 +46,6 @@ class AppRepository : ViewModel() {
                     cacheAppInfo(context, AppInfo(packageInfo.packageName,appName))
                 }
             }
-
-            mRefreshing.emit(false)
 
             mAppList = appList
             return@withContext mAppList
@@ -63,16 +64,12 @@ class AppRepository : ViewModel() {
         editor.apply()
     }
 
-    @Suppress("DEPRECATION")
-    fun invalidateCache(context: Context) {
+    suspend fun invalidateCache(context: Context) {
         val sharedPrefs = context.getSharedPreferences("app_cache", Context.MODE_PRIVATE)
         val editor = sharedPrefs.edit()
-
-        viewModelScope.launch {
-            editor.clear()
-            editor.apply()
-
-        }
+        editor.clear()
+        editor.apply()
+        getInstalledAppList(context)
     }
 
     @Suppress("DEPRECATION")

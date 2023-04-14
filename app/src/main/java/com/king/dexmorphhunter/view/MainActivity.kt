@@ -99,6 +99,18 @@ class MainActivity : AppCompatActivity() {
 
         binding.systemAppsSwitch.isChecked = systemSwitchCache
 
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            val job = Job()
+            val scope = CoroutineScope(Dispatchers.Main + job)
+            scope.launch {
+                binding.swipeRefreshLayout.isRefreshing = true
+                withContext(Dispatchers.Default) {
+                    viewModel.invalidateCache()
+                }
+                binding.swipeRefreshLayout.isRefreshing = false
+            }
+        }
+
         progressBar = binding.progressBar
 
         binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener,

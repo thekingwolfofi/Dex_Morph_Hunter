@@ -24,7 +24,7 @@ class AppListViewModel(private val context: Context) : ViewModel() {
 
     }
 
-    fun invalidateCache() {
+    suspend fun invalidateCache() {
         appRepository.invalidateCache(context)
     }
 
@@ -72,7 +72,8 @@ class AppListViewModel(private val context: Context) : ViewModel() {
 
 
     fun updateIsIntercepted(packageName: String, isIntercepted: Boolean) {
-        appRepository.updateIsIntercepted(context, packageName, isIntercepted )
+        appRepository.updateIsIntercepted(context, packageName, isIntercepted)
+        extractMethodFromApp(packageName)
     }
 
     fun extractMethodFromApp(packageName: String) {

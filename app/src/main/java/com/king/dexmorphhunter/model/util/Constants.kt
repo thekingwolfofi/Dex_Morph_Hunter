@@ -3,6 +3,9 @@ package com.king.dexmorphhunter.model.util
 import java.util.Set
 
 object Constants {
+    val removePackage = mutableSetOf(
+        "res/"
+    )
     val importantPackagesList = mutableSetOf(
         "android",
         "android.media",
