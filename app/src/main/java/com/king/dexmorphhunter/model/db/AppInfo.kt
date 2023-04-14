@@ -5,16 +5,11 @@ import android.graphics.drawable.Drawable
 data class AppInfo(
     val packageName: String,
     val appName: String,
-    var appIcon: Drawable? = null,
-    val isSystemApp: Boolean = false,
-    var isInterceptedApp: Boolean = false
+    val appIcon: Drawable? = null,
+    val appIsSystemApp: Boolean? = null,
+    val appIsIntercepted: Boolean? = null
 ){
-    fun isIntercepted(): Boolean {
-        return isInterceptedApp
-    }
 
-    fun isSystem(): Boolean {
-        return isSystemApp
-    }
 }
+
 

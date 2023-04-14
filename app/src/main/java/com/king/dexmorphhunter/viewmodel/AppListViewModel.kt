@@ -1,32 +1,37 @@
 package com.king.dexmorphhunter.viewmodel
 
-import android.util.Log
-import androidx.appcompat.widget.SearchView
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
+import androidx.lifecycle.*
 import com.king.dexmorphhunter.model.AppListModel
 import com.king.dexmorphhunter.model.db.AppInfo
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 class AppListViewModel(private val appListModel: AppListModel) : ViewModel() {
 
     private val _appList = MutableLiveData<List<AppInfo>>()
     val appList: LiveData<List<AppInfo>> = _appList
 
-    fun loadInstalledApps(interceptedAppsChecked: Boolean, systemAppsChecked: Boolean, query: String? = null) {
-        val list = appListModel.getInstalledApps(interceptedAppsChecked, systemAppsChecked, query)
-        _appList.value = list
+    suspend fun loadInstalledAppList() {
+            _appList.postValue(appListModel.getInstalledAppList().value)
     }
 
     fun filterApps(interceptedAppsChecked: Boolean, systemAppsChecked: Boolean, query: String?) {
-        val list = appListModel.getInstalledApps(interceptedAppsChecked, systemAppsChecked, query)
-        _appList.value = list
+        //val list = appListModel.getInstalledApps(interceptedAppsChecked, systemAppsChecked, query)
+        //_appList.value = list
+    }
+
+    fun getBitmapFromPackage(packageName: String): Drawable {
+        return appListModel.getBitmapFromPackage(packageName)
     }
 
 
-    fun updateInterceptedApp(packageName: String, checked: Boolean) {
-        appListModel.updateInterceptedApp(packageName, checked)
+    fun updateInterceptedApp(packageName: String, isIntercepted: Boolean) {
+        appListModel.updateIsIntercepted(packageName, isIntercepted)
+        //appListModel.extractMethodFromApp(packageName)
     }
 
     class Factory(private val appListModel: AppListModel) : ViewModelProvider.Factory {
