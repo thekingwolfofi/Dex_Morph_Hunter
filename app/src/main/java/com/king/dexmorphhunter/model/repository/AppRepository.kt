@@ -8,17 +8,13 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.king.dexmorphhunter.model.db.AppInfo
 import com.king.dexmorphhunter.model.util.Constants
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.util.*
 import android.util.Base64
-import com.king.dexmorphhunter.model.App
-
 class AppRepository : ViewModel() {
 
     @SuppressLint("QueryPermissionsNeeded")
@@ -86,7 +82,7 @@ class AppRepository : ViewModel() {
         return packageName in Constants.importantPackagesList || applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0
     }
 
-    fun isInterceptedApp(context: Context, packageName: String): Boolean {
+    private fun isInterceptedApp(context: Context, packageName: String): Boolean {
         val sharedPrefs = context.getSharedPreferences("app_cache", Context.MODE_PRIVATE)
         return sharedPrefs.getBoolean(packageName, false)
     }
@@ -154,7 +150,7 @@ class AppRepository : ViewModel() {
         return appList
     }
 
-
+    /*
     fun getCachedAppInfo(context: Context, packageName: String): AppInfo? {
         val sharedPrefs = context.getSharedPreferences("app_cache", Context.MODE_PRIVATE)
         val cached = sharedPrefs.getBoolean("cachedApps", false)
@@ -175,6 +171,7 @@ class AppRepository : ViewModel() {
         }
         return null
     }
+     */
 
     private fun encodeBitmap(bitmap: Bitmap?): String? {
         if (bitmap == null) {

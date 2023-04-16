@@ -1,5 +1,6 @@
 package com.king.dexmorphhunter.viewmodel
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.util.Log
@@ -9,6 +10,7 @@ import com.king.dexmorphhunter.model.repository.AppRepository
 import com.king.dexmorphhunter.model.util.PackageUtils
 
 @Suppress("KotlinConstantConditions")
+@SuppressLint("StaticFieldLeak")
 class AppListViewModel(private val context: Context) : ViewModel() {
 
     private val _appList = MutableLiveData<List<AppInfo>>()
@@ -28,19 +30,12 @@ class AppListViewModel(private val context: Context) : ViewModel() {
         appRepository.invalidateCache(context)
     }
 
-    fun isSystemApp( packageName: String):Boolean{
-        return appRepository.isSystemApp(context,packageName)
-    }
-
 
     // Método para buscar ícone do aplicativo
     fun getBitmapFromPackage(packageName: String): Drawable {
         return appRepository.getBitmapFromPackage(context, packageName)
     }
 
-    fun isInterceptedApp(packageName: String): Boolean {
-        return appRepository.isInterceptedApp(context,packageName)
-    }
 
     suspend fun filterInterceptedApps(checked: Boolean) {
         _filtredApps.postValue( appRepository.getInstalledAppList(context) )
@@ -76,7 +71,7 @@ class AppListViewModel(private val context: Context) : ViewModel() {
         extractMethodFromApp(packageName)
     }
 
-    fun extractMethodFromApp(packageName: String) {
+    private fun extractMethodFromApp(packageName: String) {
         // Instancia a classe MethodInfoExtractModule e chama o método extractMethods
         val listClasses = PackageUtils.getClassesInPackage(context,packageName)
 

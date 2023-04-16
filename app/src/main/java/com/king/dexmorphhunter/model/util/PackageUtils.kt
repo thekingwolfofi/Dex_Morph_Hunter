@@ -1,3 +1,4 @@
+@file:Suppress("DEPRECATION")
 package com.king.dexmorphhunter.model.util
 
 import android.content.Context
