@@ -3,9 +3,9 @@ package com.king.dexmorphhunter.viewmodel
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.drawable.Drawable
-import android.util.Log
 import androidx.lifecycle.*
 import com.king.dexmorphhunter.model.db.AppInfo
+import com.king.dexmorphhunter.model.db.ClassInfo
 import com.king.dexmorphhunter.model.repository.AppRepository
 import com.king.dexmorphhunter.model.util.PackageUtils
 
@@ -22,7 +22,7 @@ class AppListViewModel(private val context: Context) : ViewModel() {
 
 
     suspend fun getInstalledAppList() {
-        _appList.postValue(appRepository.getInstalledAppList(context))
+        _appList.postValue(appRepository.loadInstalledAppList(context))
 
     }
 
@@ -38,7 +38,7 @@ class AppListViewModel(private val context: Context) : ViewModel() {
 
 
     suspend fun filterInterceptedApps(checked: Boolean) {
-        _filtredApps.postValue( appRepository.getInstalledAppList(context) )
+        _filtredApps.postValue( appRepository.loadInstalledAppList(context) )
         if (checked) {
             _filtredApps.value?.let { appRepository.filterInterceptedApps(checked, it) }
             _appList.postValue(_filtredApps.value)
@@ -48,7 +48,7 @@ class AppListViewModel(private val context: Context) : ViewModel() {
     }
 
     suspend fun filterSystemApps(checked: Boolean){
-        _filtredApps.postValue(appRepository.getInstalledAppList(context))
+        _filtredApps.postValue(appRepository.loadInstalledAppList(context))
         if (checked) {
             _filtredApps.value?.let { appRepository.filterSystemApps(context, checked, it) }
             _appList.postValue(_filtredApps.value)
@@ -60,7 +60,7 @@ class AppListViewModel(private val context: Context) : ViewModel() {
     suspend fun filterApps(
         query: String?
     ){
-        _filtredApps.postValue(appRepository.getInstalledAppList(context))
+        _filtredApps.postValue(appRepository.loadInstalledAppList(context))
         val list = appRepository.filterApps(query, _filtredApps.value)
         _appList.postValue(list)
     }
@@ -68,15 +68,28 @@ class AppListViewModel(private val context: Context) : ViewModel() {
 
     fun updateIsIntercepted(packageName: String, isIntercepted: Boolean) {
         appRepository.updateIsIntercepted(context, packageName, isIntercepted)
-        extractMethodFromApp(packageName)
+        if(isIntercepted) {
+            val list = getExtractedClassesFromApp(context,packageName)
+        }
     }
 
-    private fun extractMethodFromApp(packageName: String) {
-        // Instancia a classe MethodInfoExtractModule e chama o método extractMethods
-        val listClasses = PackageUtils.getClassesInPackage(context,packageName)
+    @SuppressLint("CommitPrefEdits")
+    fun getExtractedClassesFromApp(context: Context,packageName: String): List<String> {
+        val listClasses = PackageUtils.getListClassesInPackage(context, packageName)
+        /*
+        // verifica se o cache existe
+        val doNotFoundCache = PackageUtils.onExistCache(context, packageName)
+        val listClasses: List<ClassInfo> = if (doNotFoundCache){
+            PackageUtils.getClassListFromCache(context, packageName)
 
-        // Faça o que precisar com a lista de nomes de método, por exemplo, imprimir no logcat
-        Log.d("MethodNames", "lista de classes " + listClasses.size)
+        }else {
+            // Instancia a classe PackageUtils e chama o método getClassesInPackage
+            PackageUtils.getClassesInPackage(context, packageName)
+
+        }
+         */
+        // Retorna os valores
+        return listClasses
     }
 
     @Suppress("UNCHECKED_CAST")

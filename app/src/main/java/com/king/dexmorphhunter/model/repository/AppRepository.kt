@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
+import android.preference.PreferenceManager
 import androidx.lifecycle.ViewModel
 import com.king.dexmorphhunter.model.db.AppInfo
 import com.king.dexmorphhunter.model.util.Constants
@@ -15,11 +16,12 @@ import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.util.*
 import android.util.Base64
+@Suppress("DEPRECATION")
 class AppRepository : ViewModel() {
 
     @SuppressLint("QueryPermissionsNeeded")
     @Suppress("DEPRECATION")
-    suspend fun getInstalledAppList(context: Context): List<AppInfo> = withContext(Dispatchers.Main){
+    suspend fun loadInstalledAppList(context: Context): List<AppInfo> = withContext(Dispatchers.Main){
         val sharedPrefs = context.getSharedPreferences("app_cache", Context.MODE_PRIVATE)
         val mAppList: MutableList<AppInfo>
         val reloadCache = sharedPrefs.getBoolean("cachedApps", false)
@@ -61,11 +63,12 @@ class AppRepository : ViewModel() {
     }
 
     suspend fun invalidateCache(context: Context) {
-        val sharedPrefs = context.getSharedPreferences("app_cache", Context.MODE_PRIVATE)
-        val editor = sharedPrefs.edit()
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val editor = prefs.edit()
         editor.clear()
         editor.apply()
-        getInstalledAppList(context)
+
+        loadInstalledAppList(context)
     }
 
     @Suppress("DEPRECATION")

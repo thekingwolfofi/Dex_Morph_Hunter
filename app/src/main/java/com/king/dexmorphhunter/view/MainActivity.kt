@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
 
         // Inicializa o ViewModel
         val appListModel = AppListModel(applicationContext)
-        val viewModelFactory = AppListViewModelFactory(applicationContext, appListModel)
+        val viewModelFactory = AppListViewModelFactory(applicationContext)
         viewModel = ViewModelProvider(this, viewModelFactory)[AppListViewModel::class.java]
 
 

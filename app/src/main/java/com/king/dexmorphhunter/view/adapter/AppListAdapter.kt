@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.king.dexmorphhunter.databinding.ItemAppBinding
 import com.king.dexmorphhunter.model.db.AppInfo
 import com.king.dexmorphhunter.view.ActivityMethodSelect
+import com.king.dexmorphhunter.viewmodel.AppListViewModel
 
 class AppListAdapter(
     private val context: Context,
@@ -17,6 +18,7 @@ class AppListAdapter(
     private val getBitmapFromPackage: (packageName: String) -> Drawable
 ) : RecyclerView.Adapter<AppListAdapter.ViewHolder>() {
 
+
     class ViewHolder(
         private val context: Context,
         private val itemBinding: ItemAppBinding,
@@ -24,7 +26,8 @@ class AppListAdapter(
         private val getBitmapFromPackage: (packageName: String) -> Drawable
     ) : RecyclerView.ViewHolder(itemBinding.root) {
 
-
+        private lateinit var classList: List<String>
+        private val appListViewModel = AppListViewModel(context)
         fun bind(appInfo: AppInfo) {
             itemBinding.appName.text = appInfo.appName
             itemBinding.appPackage.text = appInfo.packageName
@@ -37,10 +40,21 @@ class AppListAdapter(
 
             itemBinding.itemList.setOnClickListener {
                 val intent = Intent(context, ActivityMethodSelect::class.java)
-                intent.putExtra("packageName", appInfo.packageName)
-                context.startActivity(intent)
-            }
+                itemBinding.appInterceptionSwitch.isChecked = true
+                classList = appListViewModel.getExtractedClassesFromApp(context, appInfo.packageName)
+                if(classList.isNotEmpty()) {
+                    intent.putExtra("packageName", appInfo.packageName)
+                    //intent.putExtra("classList", classList)
+                    context.startActivity(intent)
+                    updateIsIntercepted(appInfo.packageName,itemBinding.appInterceptionSwitch.isChecked)
 
+                } else{
+                    itemBinding.appPackage.text = "Empty Classes"
+                    itemBinding.appInterceptionSwitch.isChecked = false
+                    itemBinding.appInterceptionSwitch.isEnabled = false
+
+                }
+            }
 
         }
 
