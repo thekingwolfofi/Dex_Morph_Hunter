@@ -3,8 +3,8 @@ package com.king.dexmorphhunter.viewmodel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.king.dexmorphhunter.model.AppListModel
 
+@Suppress("UNCHECKED_CAST")
 class AppListViewModelFactory(private val appListModel: Context) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(AppListViewModel::class.java)) {

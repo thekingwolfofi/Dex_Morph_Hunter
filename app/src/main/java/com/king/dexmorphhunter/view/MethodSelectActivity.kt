@@ -8,12 +8,12 @@ import com.king.dexmorphhunter.databinding.ActivityMethodListSelectBinding
 import com.king.dexmorphhunter.model.xposed.MethodExtractorXposedModule
 import com.king.dexmorphhunter.model.util.PackageUtils
 import com.king.dexmorphhunter.view.adapter.MethodListAdapter
-import com.king.dexmorphhunter.viewmodel.MethodSelectViewModel
 
+@Suppress("NAME_SHADOWING")
 class MethodSelectActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMethodListSelectBinding
-    private lateinit var viewModel: MethodSelectViewModel
+    //private lateinit var viewModel: MethodSelectViewModel
     private lateinit var adapter: MethodListAdapter
     private lateinit var packageUtils: PackageUtils
     private lateinit var methodExtractorXposedModule: MethodExtractorXposedModule
@@ -60,19 +60,20 @@ class MethodSelectActivity : AppCompatActivity() {
 
 
         // Obter o texto selecionado
-        val selectedClass = binding.classesSpinner.adapter.getItem(1).toString()
+        //val selectedClass = binding.classesSpinner.adapter.getItem(1).toString()
 
         // Obter todos os nomes de métodos da classe selecionada
-        val methodList = methodExtractorXposedModule.getAllMethodNames(selectedClass)
+        //val methodList = methodExtractorXposedModule.getAllMethodNames(selectedClass)
 
 
         // Inicialize o adapter
-        adapter = MethodListAdapter(this, mutableListOf(), onItemClick(), onDeleteClick())
+        adapter = MethodListAdapter(this, mutableListOf())
 
         // Configure o RecyclerView
         binding.methodSelectListRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.methodSelectListRecyclerView.adapter = adapter
 
+        adapter.enableSwipeToDelete(binding.methodSelectListRecyclerView)
 
         // Adiciona um novo objeto sempre que o botão "add" for clicado
         binding.addArgumentButton.setOnClickListener {

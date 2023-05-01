@@ -67,40 +67,15 @@ class AppListViewModel(private val context: Context) : ViewModel() {
 
     fun updateIsIntercepted(packageName: String, isIntercepted: Boolean) {
         appRepository.updateIsIntercepted(context, packageName, isIntercepted)
-        if(isIntercepted) {
-            val list = getExtractedClassesFromApp(context,packageName)
-        }
+        //if(isIntercepted) {
+        //    val list = getExtractedClassesFromApp(context,packageName)
+        //}
     }
 
     @SuppressLint("CommitPrefEdits")
-    fun getExtractedClassesFromApp(context: Context,packageName: String): List<String> {
-        val listClasses = PackageUtils.getListClassesInPackage(context, packageName)
-        /*
-        // verifica se o cache existe
-        val doNotFoundCache = PackageUtils.onExistCache(context, packageName)
-        val listClasses: List<ClassInfo> = if (doNotFoundCache){
-            PackageUtils.getClassListFromCache(context, packageName)
-
-        }else {
-            // Instancia a classe PackageUtils e chama o método getClassesInPackage
-            PackageUtils.getClassesInPackage(context, packageName)
-
-        }
-         */
+    fun getExtractedClassesFromApp(context: Context, packageName: String): List<String> {
         // Retorna os valores
-        return listClasses
+        return PackageUtils.getListClassesInPackage(context, packageName)
     }
-
-    @Suppress("UNCHECKED_CAST")
-    class Factory(private val context: Context) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(AppListViewModel::class.java)) {
-                @Suppress("UNCHECKED_CAST")
-                return AppListViewModel(context) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
-        }
-    }
-
 
 }

@@ -1,23 +1,23 @@
 package com.king.dexmorphhunter.view.adapter
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.king.dexmorphhunter.databinding.ItemListMethodBinding
+import com.king.dexmorphhunter.model.util.SwipeToDeleteCallback
 import com.king.dexmorphhunter.view.ParameterEditorActivity
 
 class MethodListAdapter(
     val context: Context,
-    private var ClassAndMethodList: MutableList<String>,
-    private val onItemClick: Unit,
-    private val onDeleteClick: Unit
+    private var ClassAndMethodList: MutableList<String>
 ) : RecyclerView.Adapter<MethodListAdapter.ViewHolder>() {
 
     inner class ViewHolder(
-        private val binding: ItemListMethodBinding,
-        private val onItemClick: Unit
+        private val binding: ItemListMethodBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(methodInfo: String) {
@@ -31,13 +31,11 @@ class MethodListAdapter(
 
         }
 
-
-
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemListMethodBinding.inflate(LayoutInflater.from(context), parent, false)
-        return ViewHolder(binding, onItemClick)
+        return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -49,17 +47,35 @@ class MethodListAdapter(
 
     fun deleteItem(position: Int) {
         onDeleteClick(ClassAndMethodList[position])
-        ClassAndMethodList.removeAt(position)
         notifyItemRemoved(position)
+         // Atualiza as posições dos itens na lista
     }
 
     private fun onDeleteClick(classInfo: String) {
-        TODO("Not yet implemented")
+        val position = ClassAndMethodList.indexOf(classInfo)
+        if (position != -1) {
+            ClassAndMethodList.removeAt(position)
+            updateItemPositions()
+            notifyItemRemoved(position)
+        }
     }
 
+    private fun updateItemPositions() {
+        for (i in 0 until ClassAndMethodList.size) {
+            notifyItemChanged(i)
+        }
+    }
+    @SuppressLint("NotifyDataSetChanged")
     fun addItem(classInfo: String) {
         ClassAndMethodList.add(classInfo)
         notifyDataSetChanged()
+    }
+
+
+    fun enableSwipeToDelete(recyclerView: RecyclerView) {
+        val swipeToDeleteCallback = SwipeToDeleteCallback(this)
+        val itemTouchHelper = ItemTouchHelper(swipeToDeleteCallback)
+        itemTouchHelper.attachToRecyclerView(recyclerView)
     }
 
 }

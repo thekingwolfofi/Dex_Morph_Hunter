@@ -2,7 +2,7 @@ package com.king.dexmorphhunter.model
 
 import com.google.gson.Gson
 
-class Test() {
+class Test {
     fun testAllTypes(
         inteiro: Int,
         longo: Long,

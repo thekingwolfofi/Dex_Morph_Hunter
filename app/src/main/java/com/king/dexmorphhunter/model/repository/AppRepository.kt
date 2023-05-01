@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.king.dexmorphhunter.model.repository
 
 import android.annotation.SuppressLint

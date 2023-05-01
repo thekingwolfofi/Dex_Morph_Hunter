@@ -1,5 +1,6 @@
 package com.king.dexmorphhunter.model
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -8,6 +9,7 @@ import kotlinx.coroutines.runBlocking
 
 class PackageRemovedReceiver : BroadcastReceiver() {
 
+    @SuppressLint("CommitPrefEdits")
     override fun onReceive(context: Context, intent: Intent?) {
         val appRepository = AppRepository()
         if (intent?.action == Intent.ACTION_PACKAGE_REMOVED) {

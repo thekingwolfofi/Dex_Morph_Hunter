@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.king.dexmorphhunter.view.adapter.MethodListAdapter
 
+@Suppress("DEPRECATION")
 class SwipeToDeleteCallback(
     private val adapter: MethodListAdapter
 ) : ItemTouchHelper.SimpleCallback(

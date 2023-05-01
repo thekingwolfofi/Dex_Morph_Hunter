@@ -7,17 +7,17 @@ import com.king.dexmorphhunter.databinding.ActivityParameterEditorBinding
 import com.king.dexmorphhunter.model.Test
 import com.king.dexmorphhunter.model.db.ArgumentInfo
 import com.king.dexmorphhunter.view.adapter.ArgumentsListAdapter
-import com.king.dexmorphhunter.viewmodel.MethodSelectViewModel
 
+@Suppress("SameParameterValue")
 class ParameterEditorActivity : AppCompatActivity() {
     private lateinit var binding: ActivityParameterEditorBinding
-    private lateinit var viewModel: MethodSelectViewModel
+    //private lateinit var viewModel: MethodSelectViewModel
     private lateinit var adapter: ArgumentsListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Inicializa o contexto
-        val context = applicationContext
+        //val context = applicationContext
 
         // Inicializa as variaveis passadas por instancia
         val arguments = getArgumentsInfo("testAllTypes", Test::class.java)
@@ -36,7 +36,7 @@ class ParameterEditorActivity : AppCompatActivity() {
         val method = targetClass.methods.firstOrNull { it.name == methodName }
         if (method != null) {
             val parameters = method.parameters
-            return parameters.mapIndexed { index, parameter ->
+            return parameters.mapIndexed { _ , parameter ->
                 val paramType = parameter.type
                 val typeName = when {
                     paramType.isArray -> paramType.componentType.simpleName + "Array"

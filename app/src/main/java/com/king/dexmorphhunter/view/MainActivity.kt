@@ -11,7 +11,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.king.dexmorphhunter.databinding.ActivityMainBinding
-import com.king.dexmorphhunter.model.AppListModel
 import com.king.dexmorphhunter.model.db.AppInfo
 import com.king.dexmorphhunter.view.adapter.AppListAdapter
 import com.king.dexmorphhunter.viewmodel.AppListViewModel
@@ -39,7 +38,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // Inicializa o ViewModel
-        val appListModel = AppListModel(applicationContext)
         val viewModelFactory = AppListViewModelFactory(applicationContext)
         viewModel = ViewModelProvider(this, viewModelFactory)[AppListViewModel::class.java]
 
