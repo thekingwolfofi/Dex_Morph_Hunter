@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.king.dexmorphhunter.databinding.ItemAppBinding
 import com.king.dexmorphhunter.model.db.AppInfo
-import com.king.dexmorphhunter.view.ActivityMethodSelect
+import com.king.dexmorphhunter.view.MethodSelectActivity
 import com.king.dexmorphhunter.viewmodel.AppListViewModel
 
 class AppListAdapter(
@@ -39,7 +39,7 @@ class AppListAdapter(
             }
 
             itemBinding.itemList.setOnClickListener {
-                val intent = Intent(context, ActivityMethodSelect::class.java)
+                val intent = Intent(context, MethodSelectActivity::class.java)
                 itemBinding.appInterceptionSwitch.isChecked = true
                 classList = appListViewModel.getExtractedClassesFromApp(context, appInfo.packageName)
                 if(classList.isNotEmpty()) {

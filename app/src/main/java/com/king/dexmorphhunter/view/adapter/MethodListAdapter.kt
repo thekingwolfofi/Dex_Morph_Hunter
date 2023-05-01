@@ -1,15 +1,16 @@
 package com.king.dexmorphhunter.view.adapter
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.king.dexmorphhunter.databinding.ItemListMethodBinding
-import com.king.dexmorphhunter.model.db.ClassInfo
+import com.king.dexmorphhunter.view.ParameterEditorActivity
 
 class MethodListAdapter(
     val context: Context,
-    private var ClassAndMethodList: MutableList<ClassInfo>,
+    private var ClassAndMethodList: MutableList<String>,
     private val onItemClick: Unit,
     private val onDeleteClick: Unit
 ) : RecyclerView.Adapter<MethodListAdapter.ViewHolder>() {
@@ -19,13 +20,19 @@ class MethodListAdapter(
         private val onItemClick: Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(methodInfo: ClassInfo) {
-            binding.classNameTextView.text = methodInfo.className
+        fun bind(methodInfo: String) {
+            binding.classNameTextView.text = methodInfo
             //binding.methodNameTextView .text = methodInfo.methodName
-            //binding.selectButton.setOnClickListener { onItemClick(methodInfo.methodName) }
+            binding.selectButton.setOnClickListener {
+                val intent = Intent(context, ParameterEditorActivity::class.java)
+                context.startActivity(intent)
+            }
             //binding.root.setOnClickListener { onDeleteClick(methodInfo) }
 
         }
+
+
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -34,7 +41,7 @@ class MethodListAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val methodInfo: ClassInfo = ClassAndMethodList[position]
+        val methodInfo: String = ClassAndMethodList[position]
         holder.bind(methodInfo)
     }
 
@@ -46,11 +53,11 @@ class MethodListAdapter(
         notifyItemRemoved(position)
     }
 
-    private fun onDeleteClick(classInfo: ClassInfo) {
+    private fun onDeleteClick(classInfo: String) {
         TODO("Not yet implemented")
     }
 
-    fun addItem(classInfo: ClassInfo) {
+    fun addItem(classInfo: String) {
         ClassAndMethodList.add(classInfo)
         notifyDataSetChanged()
     }

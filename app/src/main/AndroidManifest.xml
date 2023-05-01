@@ -33,8 +33,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".view.ActivityMethodSelect"
-            android:exported="true"></activity>
+            android:name=".view.MethodSelectActivity"
+            android:exported="true" ></activity>
+
+        <activity
+            android:name="com.king.dexmorphhunter.view.ParameterEditorActivity"
+            android:exported="true" ></activity>
 
         <meta-data
             android:name="xposedmodule"

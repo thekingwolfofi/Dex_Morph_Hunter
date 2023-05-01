@@ -5,13 +5,12 @@ import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.king.dexmorphhunter.databinding.ActivityMethodListSelectBinding
-import com.king.dexmorphhunter.model.db.ClassInfo
 import com.king.dexmorphhunter.model.xposed.MethodExtractorXposedModule
 import com.king.dexmorphhunter.model.util.PackageUtils
 import com.king.dexmorphhunter.view.adapter.MethodListAdapter
 import com.king.dexmorphhunter.viewmodel.MethodSelectViewModel
 
-class ActivityMethodSelect : AppCompatActivity() {
+class MethodSelectActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMethodListSelectBinding
     private lateinit var viewModel: MethodSelectViewModel
@@ -36,7 +35,7 @@ class ActivityMethodSelect : AppCompatActivity() {
 
         // Inializa o filtro e seta a lista como filtrada
         var isFilterEnabled = true
-        var classList = packageUtils.getListClassesInPackage(context, packageName.toString())
+        val classList = packageUtils.getListClassesInPackage(context, packageName.toString())
 
         // Atualiza a lista de classes de acordo com o filtro
         val filteredClassList: List< String> = if (isFilterEnabled) {
@@ -51,7 +50,7 @@ class ActivityMethodSelect : AppCompatActivity() {
 
         binding.titleTextView.text = packageName
 
-        var adapterClassSpinner = arrayAdapter(filteredClassList)
+        val adapterClassSpinner = arrayAdapter(filteredClassList)
 
         // Define o layout a ser usado para exibir cada item do spinner
         adapterClassSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -77,7 +76,7 @@ class ActivityMethodSelect : AppCompatActivity() {
 
         // Adiciona um novo objeto sempre que o botão "add" for clicado
         binding.addArgumentButton.setOnClickListener {
-            val classInfo = ClassInfo("teste")
+            val classInfo = "teste"
             adapter.addItem(classInfo)
         }
 

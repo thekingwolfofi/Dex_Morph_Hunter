@@ -5,7 +5,6 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import androidx.lifecycle.*
 import com.king.dexmorphhunter.model.db.AppInfo
-import com.king.dexmorphhunter.model.db.ClassInfo
 import com.king.dexmorphhunter.model.repository.AppRepository
 import com.king.dexmorphhunter.model.util.PackageUtils
 
