@@ -96,7 +96,7 @@ class MethodSelectActivity : AppCompatActivity() {
             // Atualiza o adapter do spinner
             adapterClassSpinner.clear()
             adapterClassSpinner.addAll(filteredClassList)
-            //adapterClassSpinner.notifyDataSetChanged()
+            adapterClassSpinner.notifyDataSetChanged()
         }
     }
 
@@ -104,11 +104,4 @@ class MethodSelectActivity : AppCompatActivity() {
        return ArrayAdapter(this, android.R.layout.simple_spinner_item, list)
     }
 
-    private fun onDeleteClick() {
-
-    }
-
-    private fun onItemClick() {
-
-    }
 }

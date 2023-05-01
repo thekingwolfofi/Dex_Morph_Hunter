@@ -30,15 +30,6 @@ class SwipeToDeleteCallback(
         adapter.deleteItem(position)
     }
 
-     override fun getSwipeDirs(
-        recyclerView: RecyclerView,
-        viewHolder: RecyclerView.ViewHolder
-    ): Int {
-        // Vamos permitir que o usuário deslize o item para o lado esquerdo ou direito
-        // para remover o item da lista
-        return super.getSwipeDirs(recyclerView, viewHolder)
-    }
-
     override fun onChildDraw(
         c: Canvas,
         recyclerView: RecyclerView,
