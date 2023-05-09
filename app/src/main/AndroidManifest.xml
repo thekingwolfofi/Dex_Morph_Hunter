@@ -21,9 +21,6 @@
         android:theme="@style/Theme.DexMorphHunter"
         tools:targetApi="31">
         <activity
-            android:name=".ParameterEditorActivity"
-            android:exported="false" />
-        <activity
             android:name=".view.MainActivity"
             android:exported="true">
             <intent-filter>
@@ -37,8 +34,11 @@
             android:exported="true" ></activity>
 
         <activity
-            android:name="com.king.dexmorphhunter.view.ParameterEditorActivity"
+            android:name=".view.ParameterEditorActivity"
             android:exported="true" ></activity>
+
+        <activity android:name =".view.ModuleSelectActivity"
+            android:exported="false"></activity>
 
         <meta-data
             android:name="xposedmodule"

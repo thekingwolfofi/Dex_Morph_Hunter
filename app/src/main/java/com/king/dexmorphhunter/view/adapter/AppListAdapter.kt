@@ -7,7 +7,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.king.dexmorphhunter.databinding.ItemAppBinding
-import com.king.dexmorphhunter.model.db.AppInfo
+import com.king.dexmorphhunter.model.data.AppInfo
 import com.king.dexmorphhunter.view.MethodSelectActivity
 import com.king.dexmorphhunter.viewmodel.AppListViewModel
 
@@ -32,7 +32,7 @@ class AppListAdapter(
             itemBinding.appName.text = appInfo.appName
             itemBinding.appPackage.text = appInfo.packageName
             itemBinding.appIcon.setImageDrawable(getBitmapFromPackage(appInfo.packageName))
-            itemBinding.appInterceptionSwitch.isChecked = appInfo.appIsIntercepted ?: false
+            itemBinding.appInterceptionSwitch.isChecked = appInfo.isInterceptedApp ?: false
 
             itemBinding.appInterceptionSwitch.setOnCheckedChangeListener { _, isChecked  ->
                 updateIsIntercepted(appInfo.packageName, isChecked)

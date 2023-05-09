@@ -1,4 +1,4 @@
-package com.king.dexmorphhunter.model.db
+package com.king.dexmorphhunter.model.data
 
 data class ArgumentInfo(
     val name: String,

@@ -8,8 +8,9 @@ import com.king.dexmorphhunter.databinding.ActivityMethodListSelectBinding
 import com.king.dexmorphhunter.model.xposed.MethodExtractorXposedModule
 import com.king.dexmorphhunter.model.util.PackageUtils
 import com.king.dexmorphhunter.view.adapter.MethodListAdapter
+import dagger.hilt.android.AndroidEntryPoint
 
-@Suppress("NAME_SHADOWING")
+@AndroidEntryPoint
 class MethodSelectActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMethodListSelectBinding

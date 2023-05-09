@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <RelativeLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent">
+
+    <!-- TextView para exibir o nome do pacote do aplicativo alvo -->
+    <TextView
+        android:id="@+id/packageNameTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Nome do Pacote"
+        android:textSize="24sp"
+        android:textAlignment="center"
+        android:padding="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@android:color/darker_gray"/>
+
+    <!-- RecyclerView para exibir a lista de funções do módulo Xposed -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/functionRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/packageNameTextView"
+        android:padding="8dp" />
+
+  </RelativeLayout>
+
+</layout>

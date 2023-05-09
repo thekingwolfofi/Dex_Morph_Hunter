@@ -4,77 +4,83 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.drawable.Drawable
 import androidx.lifecycle.*
-import com.king.dexmorphhunter.model.db.AppInfo
+import com.king.dexmorphhunter.model.data.AppInfo
+import com.king.dexmorphhunter.model.data.AppSettings
+import com.king.dexmorphhunter.model.db.AppDatabase
 import com.king.dexmorphhunter.model.repository.AppRepository
 import com.king.dexmorphhunter.model.util.PackageUtils
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @Suppress("KotlinConstantConditions")
 @SuppressLint("StaticFieldLeak")
-class AppListViewModel(private val context: Context) : ViewModel() {
+@HiltViewModel
+class AppListViewModel @Inject constructor(private val appRepository: AppRepository, private val context: Context) : ViewModel() {
+
+    private val _filterSystemApps = MutableLiveData(false)
+    val filterSystemApps: LiveData<Boolean> = _filterSystemApps
+
+    private val _filterInterceptedApps = MutableLiveData(false)
+    val filterInterceptedApps: LiveData<Boolean> = _filterInterceptedApps
+
+    private val _filterQueryApps = MutableLiveData("")
+    val filterQueryApps: LiveData<String> = _filterQueryApps
 
     private val _appList = MutableLiveData<List<AppInfo>>()
     val appList: LiveData<List<AppInfo>> = _appList
 
-    private var _filtredApps = MutableLiveData<List<AppInfo>>()
-
-    private val appRepository = AppRepository()
-
-
     suspend fun getInstalledAppList() {
         _appList.postValue(appRepository.loadInstalledAppList(context))
-
     }
 
     suspend fun invalidateCache() {
         appRepository.invalidateCache(context)
     }
 
-
     // Método para buscar ícone do aplicativo
     fun getBitmapFromPackage(packageName: String): Drawable {
         return appRepository.getBitmapFromPackage(context, packageName)
     }
 
+    fun filterInterceptedApps(checked: Boolean) {
+        _filterInterceptedApps.postValue(checked)
+    }
 
-    suspend fun filterInterceptedApps(checked: Boolean) {
-        _filtredApps.postValue( appRepository.loadInstalledAppList(context) )
-        if (checked) {
-            _filtredApps.value?.let { appRepository.filterInterceptedApps(checked, it) }
-            _appList.postValue(_filtredApps.value)
-        }else{
-            _appList.postValue(_filtredApps.value)
+    fun filterSystemApps(checked: Boolean){
+        _filterSystemApps.postValue(checked)
+    }
+
+    fun filterQueryApps(query: String?){
+        viewModelScope.launch {
+            _filterQueryApps.postValue(query)
         }
     }
-
-    suspend fun filterSystemApps(checked: Boolean){
-        _filtredApps.postValue(appRepository.loadInstalledAppList(context))
-        if (checked) {
-            _filtredApps.value?.let { appRepository.filterSystemApps(context, checked, it) }
-            _appList.postValue(_filtredApps.value)
-        }else{
-            _appList.postValue(_filtredApps.value)
-        }
-    }
-
-    suspend fun filterApps(
-        query: String?
-    ){
-        _filtredApps.postValue(appRepository.loadInstalledAppList(context))
-        val list = appRepository.filterApps(query, _filtredApps.value)
-        _appList.postValue(list)
-    }
-
 
     fun updateIsIntercepted(packageName: String, isIntercepted: Boolean) {
         appRepository.updateIsIntercepted(context, packageName, isIntercepted)
-        //if(isIntercepted) {
-        //    val list = getExtractedClassesFromApp(context,packageName)
-        //}
     }
 
-    @SuppressLint("CommitPrefEdits")
+    fun updateListApps() {
+        viewModelScope.launch {
+            val query = filterQueryApps.value ?: ""
+            val interceptedApps = filterInterceptedApps.value ?: false
+            val systemApps = filterSystemApps.value ?: false
+
+            val appSettingsDao = AppDatabase.getDatabase(context).appSettingsDao()
+            val settings = appSettingsDao.getAppSettings()
+            if (settings != null) {
+                if (settings.systemAppsSwitch != systemApps || settings.interceptedAppsSwitch != interceptedApps) {
+                    val appSettings = AppSettings(1, interceptedApps, systemApps)
+                    appRepository.updateSettings(appSettings)
+                }
+            }
+            val appList = appRepository.filterApps(query,interceptedApps, systemApps)
+            _appList.postValue(appList)
+        }
+    }
+
     fun getExtractedClassesFromApp(context: Context, packageName: String): List<String> {
-        // Retorna os valores
         return PackageUtils.getListClassesInPackage(context, packageName)
     }
 

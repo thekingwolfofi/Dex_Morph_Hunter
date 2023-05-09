@@ -5,10 +5,11 @@ import android.os.Bundle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.king.dexmorphhunter.databinding.ActivityParameterEditorBinding
 import com.king.dexmorphhunter.model.Test
-import com.king.dexmorphhunter.model.db.ArgumentInfo
+import com.king.dexmorphhunter.model.data.ArgumentInfo
 import com.king.dexmorphhunter.view.adapter.ArgumentsListAdapter
+import dagger.hilt.android.AndroidEntryPoint
 
-@Suppress("SameParameterValue")
+@AndroidEntryPoint
 class ParameterEditorActivity : AppCompatActivity() {
     private lateinit var binding: ActivityParameterEditorBinding
     //private lateinit var viewModel: MethodSelectViewModel

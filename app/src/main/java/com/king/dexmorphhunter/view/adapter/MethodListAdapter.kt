@@ -4,17 +4,22 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.king.dexmorphhunter.databinding.ItemListMethodBinding
-import com.king.dexmorphhunter.model.util.SwipeToDeleteCallback
 import com.king.dexmorphhunter.view.ParameterEditorActivity
 
+@Suppress("DEPRECATION")
 class MethodListAdapter(
     val context: Context,
     private var ClassAndMethodList: MutableList<String>
 ) : RecyclerView.Adapter<MethodListAdapter.ViewHolder>() {
+
+    var swipedPosition = -1
+    var deleteConfirmationPosition = -1
+    var isDeleteConfirmationVisible = false
 
     inner class ViewHolder(
         private val binding: ItemListMethodBinding
@@ -22,13 +27,25 @@ class MethodListAdapter(
 
         fun bind(methodInfo: String) {
             binding.classNameTextView.text = methodInfo
-            //binding.methodNameTextView .text = methodInfo.methodName
+
+            if (isDeleteConfirmationVisible && adapterPosition == deleteConfirmationPosition) {
+                // Exibe o botão de exclusão e oculta o ícone de exclusão padrão
+                    binding.deleteIcon.visibility = View.VISIBLE
+
+                // Define o clique no botão de exclusão para confirmar a exclusão
+                binding.deleteIcon.setOnClickListener {
+                    val position = adapterPosition
+                    deleteItem(position)
+                }
+            } else {
+                // Oculta o botão de exclusão e exibe o ícone de exclusão padrão
+                binding.deleteIcon.visibility = View.GONE
+            }
+
             binding.selectButton.setOnClickListener {
                 val intent = Intent(context, ParameterEditorActivity::class.java)
                 context.startActivity(intent)
             }
-            //binding.root.setOnClickListener { onDeleteClick(methodInfo) }
-
         }
 
     }
@@ -46,18 +63,14 @@ class MethodListAdapter(
     override fun getItemCount(): Int = ClassAndMethodList.size
 
     fun deleteItem(position: Int) {
-        onDeleteClick(ClassAndMethodList[position])
+        ClassAndMethodList.removeAt(position)
         notifyItemRemoved(position)
-         // Atualiza as posições dos itens na lista
-    }
 
-    private fun onDeleteClick(classInfo: String) {
-        val position = ClassAndMethodList.indexOf(classInfo)
-        if (position != -1) {
-            ClassAndMethodList.removeAt(position)
-            updateItemPositions()
-            notifyItemRemoved(position)
-        }
+        // Redefine as variáveis de confirmação para ocultar o botão de exclusão
+        swipedPosition = -1
+        deleteConfirmationPosition = -1
+        isDeleteConfirmationVisible = false
+        updateItemPositions()
     }
 
     private fun updateItemPositions() {
@@ -65,6 +78,7 @@ class MethodListAdapter(
             notifyItemChanged(i)
         }
     }
+
     @SuppressLint("NotifyDataSetChanged")
     fun addItem(classInfo: String) {
         ClassAndMethodList.add(classInfo)
@@ -77,5 +91,38 @@ class MethodListAdapter(
         val itemTouchHelper = ItemTouchHelper(swipeToDeleteCallback)
         itemTouchHelper.attachToRecyclerView(recyclerView)
     }
+
+}
+
+@Suppress("DEPRECATION")
+class SwipeToDeleteCallback(
+    private val adapter: MethodListAdapter
+) : ItemTouchHelper.SimpleCallback(
+    ItemTouchHelper.UP or ItemTouchHelper.DOWN,
+    ItemTouchHelper.START or ItemTouchHelper.END
+) {
+
+    override fun onMove(
+        recyclerView: RecyclerView,
+        viewHolder: RecyclerView.ViewHolder,
+        target: RecyclerView.ViewHolder
+    ): Boolean {
+        return false
+    }
+
+    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+        val position = viewHolder.adapterPosition
+
+        // Define as posições do item deslizado e do item de confirmação
+        adapter.swipedPosition = position
+        adapter.deleteConfirmationPosition = position
+
+        adapter.isDeleteConfirmationVisible =
+            !(direction == ItemTouchHelper.LEFT || direction == ItemTouchHelper.RIGHT)
+
+        // Notifica o adapter para atualizar a aparência dos itens
+        adapter.notifyItemChanged(position)
+    }
+
 
 }

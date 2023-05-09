@@ -1,7 +1,5 @@
 package com.king.dexmorphhunter.view
 
-import android.annotation.SuppressLint
-import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -11,46 +9,41 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.king.dexmorphhunter.databinding.ActivityMainBinding
-import com.king.dexmorphhunter.model.db.AppInfo
+import com.king.dexmorphhunter.model.data.AppInfo
 import com.king.dexmorphhunter.view.adapter.AppListAdapter
 import com.king.dexmorphhunter.viewmodel.AppListViewModel
 import com.king.dexmorphhunter.viewmodel.AppListViewModelFactory
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 
-@Suppress("NAME_SHADOWING")
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityMainBinding
-    private lateinit var viewModel: AppListViewModel
-    private lateinit var adapter: AppListAdapter
-    private lateinit var progressBar: ProgressBar
+    lateinit var binding: ActivityMainBinding
+    lateinit var viewModel: AppListViewModel
+    lateinit var adapter: AppListAdapter
+    lateinit var progressBar: ProgressBar
 
     private var appList: List<AppInfo> = emptyList()
 
-    @SuppressLint("CommitPrefEdits")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val sharedPrefs = this.getSharedPreferences("app_cache", Context.MODE_PRIVATE)
+        // Carrega a lista de aplicativos
+        loadApps()
 
-        // Inicializa a view binding
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        viewModelSetup()
+
+        bindingSetup()
+
+    }
+
+    fun viewModelSetup(){
 
         // Inicializa o ViewModel
         val viewModelFactory = AppListViewModelFactory(applicationContext)
         viewModel = ViewModelProvider(this, viewModelFactory)[AppListViewModel::class.java]
 
-
-        // Carrega a lista de aplicativos
-        //viewModel.loadInstalledAppList()
-        loadApps()
-
-        // Inicializa o RecyclerView
-        binding.appListRecyclerView.layoutManager = LinearLayoutManager(this)
-
-        // Adiciona um item de decoração ao RecyclerView (opcional)
-        binding.appListRecyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
 
         // Observe as mudanças na lista de aplicativos
         viewModel.appList.observe(this) { newList ->
@@ -59,10 +52,31 @@ class MainActivity : AppCompatActivity() {
             binding.appListRecyclerView.adapter = adapter
         }
 
+        viewModel.filterInterceptedApps.observe(this){
+            filterApps()
+        }
+
+        viewModel.filterSystemApps.observe(this){
+            filterApps()
+        }
+
+        viewModel.filterQueryApps.observe(this){
+            filterApps()
+        }
+    }
+    private fun bindingSetup(){
+
+        // Inicializa a view binding
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        // Inicializa o RecyclerView
+        binding.appListRecyclerView.layoutManager = LinearLayoutManager(this)
+
+        // Adiciona um item de decoração ao RecyclerView (opcional)
+        binding.appListRecyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
+
         binding.interceptedAppsSwitch.setOnCheckedChangeListener { _, isChecked ->
-            val sharedPrefs = this.getSharedPreferences("app_cache", Context.MODE_PRIVATE)
-            val editor = sharedPrefs.edit()
-            editor.putBoolean("interceptedAppsSwitch",isChecked)
             val job = Job()
             val scope = CoroutineScope(Dispatchers.Main + job)
             scope.launch {
@@ -74,14 +88,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val interceptedSwitchCache = sharedPrefs.getBoolean("interceptedAppsSwitch",false)
-
-        binding.interceptedAppsSwitch.isChecked = interceptedSwitchCache
-
         binding.systemAppsSwitch.setOnCheckedChangeListener { _, isChecked ->
-            val sharedPrefs = this.getSharedPreferences("app_cache", Context.MODE_PRIVATE)
-            val editor = sharedPrefs.edit()
-            editor.putBoolean("systemAppsSwitch",isChecked)
             val job = Job()
             val scope = CoroutineScope(Dispatchers.Main + job)
             scope.launch {
@@ -92,11 +99,6 @@ class MainActivity : AppCompatActivity() {
                 binding.progressBar.visibility = View.GONE
             }
         }
-
-
-        val systemSwitchCache = sharedPrefs.getBoolean("systemAppsSwitch",false)
-
-        binding.systemAppsSwitch.isChecked = systemSwitchCache
 
         binding.swipeRefreshLayout.setOnRefreshListener {
             val job = Job()
@@ -120,7 +122,7 @@ class MainActivity : AppCompatActivity() {
                 scope.launch {
                     binding.progressBar.visibility = View.VISIBLE
                     withContext(Dispatchers.Default) {
-                        viewModel.filterApps(
+                        viewModel.filterQueryApps(
                             query
                         )
                     }
@@ -133,7 +135,6 @@ class MainActivity : AppCompatActivity() {
                 return false
             }
         })
-
     }
 
     private fun loadApps() {
@@ -145,6 +146,15 @@ class MainActivity : AppCompatActivity() {
                 viewModel.getInstalledAppList()
             }
             binding.progressBar.visibility = View.GONE
+        }
+    }
+
+    private fun filterApps(){
+        val job = Job()
+        val scope = CoroutineScope(Dispatchers.IO + job)
+        scope.launch {
+            viewModel.updateListApps()
+
         }
     }
 

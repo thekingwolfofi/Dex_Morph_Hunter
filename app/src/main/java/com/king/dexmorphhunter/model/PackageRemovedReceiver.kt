@@ -11,7 +11,7 @@ class PackageRemovedReceiver : BroadcastReceiver() {
 
     @SuppressLint("CommitPrefEdits")
     override fun onReceive(context: Context, intent: Intent?) {
-        val appRepository = AppRepository()
+        val appRepository = AppRepository(context)
         if (intent?.action == Intent.ACTION_PACKAGE_REMOVED) {
             val sharedPrefs = context.getSharedPreferences("app_cache", Context.MODE_PRIVATE)
             val editor = sharedPrefs.edit()

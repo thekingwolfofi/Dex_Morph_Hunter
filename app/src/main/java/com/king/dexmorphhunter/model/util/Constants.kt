@@ -5,6 +5,7 @@ object Constants {
         "res/"
     )
     val importantPackagesList = mutableSetOf(
+        "king",
         "android",
         "com.android",
         "android.media",

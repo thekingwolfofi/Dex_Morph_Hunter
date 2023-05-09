@@ -5,7 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.king.dexmorphhunter.databinding.ItemParameterListBinding
-import com.king.dexmorphhunter.model.db.ArgumentInfo
+import com.king.dexmorphhunter.model.data.ArgumentInfo
 
 class ArgumentsListAdapter(
     private val arguments: List<ArgumentInfo>
