@@ -8,7 +8,7 @@ import com.king.dexmorphhunter.model.data.AppInfo
 interface AppInfoDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(appInfos: List<AppInfo>)
+    suspend fun insertAll(appInfoList: List<AppInfo>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(appInfo: AppInfo)
@@ -34,6 +34,12 @@ interface AppInfoDao {
             "ORDER BY appName ASC"
     )
     fun getFilterApps(query: String, isSystem: Boolean, isIntercepted: Boolean): List<AppInfo>
+
+    @Query("DELETE FROM app_info")
+    suspend fun deleteAll()
+
+    @Query("UPDATE app_info SET is_intercepted_app = :isIntercepted WHERE package_name = :packageName")
+    suspend fun updateIsIntercepted(packageName: String, isIntercepted: Boolean)
 
     fun testQuery(query: String, isSystem: Boolean, isIntercepted: Boolean): List<AppInfo> {
         val apps = getFilterApps(query, isSystem, isIntercepted)
@@ -89,5 +95,4 @@ interface AppInfoDao {
         return apps
     }
 
-    // Defina outros métodos que você precisar
 }

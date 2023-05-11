@@ -15,14 +15,13 @@ import com.king.dexmorphhunter.viewmodel.AppListViewModel
 import com.king.dexmorphhunter.viewmodel.AppListViewModelFactory
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity @Inject constructor(private var viewModel: AppListViewModel, private var adapter: AppListAdapter) : AppCompatActivity() {
 
-    lateinit var binding: ActivityMainBinding
-    lateinit var viewModel: AppListViewModel
-    lateinit var adapter: AppListAdapter
-    lateinit var progressBar: ProgressBar
+    private lateinit var binding: ActivityMainBinding
+    private lateinit var progressBar: ProgressBar
 
     private var appList: List<AppInfo> = emptyList()
 
@@ -38,7 +37,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun viewModelSetup(){
+    private fun viewModelSetup(){
 
         // Inicializa o ViewModel
         val viewModelFactory = AppListViewModelFactory(applicationContext)
@@ -48,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         // Observe as mudanças na lista de aplicativos
         viewModel.appList.observe(this) { newList ->
             appList = newList ?: emptyList()
-            adapter = AppListAdapter(this, appList, viewModel::updateIsIntercepted,viewModel::getBitmapFromPackage)
+            //adapter = AppListAdapter(this, appList, viewModel::updateIsIntercepted,viewModel::getBitmapFromPackage)
             binding.appListRecyclerView.adapter = adapter
         }
 

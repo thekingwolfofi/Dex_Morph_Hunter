@@ -1,4 +1,4 @@
-package com.king.dexmorphhunter.model
+package com.king.dexmorphhunter.model.app
 
 import android.app.Application
 import androidx.room.Room

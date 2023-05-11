@@ -10,10 +10,14 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.king.dexmorphhunter.databinding.ItemListMethodBinding
 import com.king.dexmorphhunter.view.ParameterEditorActivity
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
 @Suppress("DEPRECATION")
-class MethodListAdapter(
-    val context: Context,
+@AndroidEntryPoint
+class MethodListAdapter @Inject constructor(
+    @ApplicationContext val context: Context,
     private var ClassAndMethodList: MutableList<String>
 ) : RecyclerView.Adapter<MethodListAdapter.ViewHolder>() {
 

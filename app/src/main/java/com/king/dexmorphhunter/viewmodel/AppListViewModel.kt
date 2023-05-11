@@ -10,13 +10,18 @@ import com.king.dexmorphhunter.model.db.AppDatabase
 import com.king.dexmorphhunter.model.repository.AppRepository
 import com.king.dexmorphhunter.model.util.PackageUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @Suppress("KotlinConstantConditions")
 @SuppressLint("StaticFieldLeak")
 @HiltViewModel
-class AppListViewModel @Inject constructor(private val appRepository: AppRepository, private val context: Context) : ViewModel() {
+class AppListViewModel @Inject constructor(
+        @ApplicationContext val context: Context,
+        private val appRepository: AppRepository
+    ) : ViewModel() {
+
 
     private val _filterSystemApps = MutableLiveData(false)
     val filterSystemApps: LiveData<Boolean> = _filterSystemApps
@@ -57,8 +62,8 @@ class AppListViewModel @Inject constructor(private val appRepository: AppReposit
         }
     }
 
-    fun updateIsIntercepted(packageName: String, isIntercepted: Boolean) {
-        appRepository.updateIsIntercepted(context, packageName, isIntercepted)
+    suspend fun updateIsIntercepted(packageName: String, isIntercepted: Boolean) {
+        appRepository.updateIsIntercepted( packageName, isIntercepted)
     }
 
     fun updateListApps() {

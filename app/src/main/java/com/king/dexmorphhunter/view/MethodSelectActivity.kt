@@ -10,12 +10,13 @@ import com.king.dexmorphhunter.model.util.PackageUtils
 import com.king.dexmorphhunter.view.adapter.MethodListAdapter
 import dagger.hilt.android.AndroidEntryPoint
 
+@Suppress("NAME_SHADOWING")
 @AndroidEntryPoint
 class MethodSelectActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMethodListSelectBinding
     //private lateinit var viewModel: MethodSelectViewModel
-    private lateinit var adapter: MethodListAdapter
+    private lateinit var methodListAdapter: MethodListAdapter
     private lateinit var packageUtils: PackageUtils
     private lateinit var methodExtractorXposedModule: MethodExtractorXposedModule
 
@@ -68,18 +69,18 @@ class MethodSelectActivity : AppCompatActivity() {
 
 
         // Inicialize o adapter
-        adapter = MethodListAdapter(this, mutableListOf())
+        methodListAdapter = MethodListAdapter(this, mutableListOf())
 
         // Configure o RecyclerView
         binding.methodSelectListRecyclerView.layoutManager = LinearLayoutManager(this)
-        binding.methodSelectListRecyclerView.adapter = adapter
+        binding.methodSelectListRecyclerView.adapter = methodListAdapter
 
-        adapter.enableSwipeToDelete(binding.methodSelectListRecyclerView)
+        methodListAdapter.enableSwipeToDelete(binding.methodSelectListRecyclerView)
 
         // Adiciona um novo objeto sempre que o botão "add" for clicado
         binding.addArgumentButton.setOnClickListener {
             val classInfo = "teste"
-            adapter.addItem(classInfo)
+            methodListAdapter.addItem(classInfo)
         }
 
         // Adiciona o listener para o botão de filtro

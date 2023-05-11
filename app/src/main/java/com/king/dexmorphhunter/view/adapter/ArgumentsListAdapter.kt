@@ -6,9 +6,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.king.dexmorphhunter.databinding.ItemParameterListBinding
 import com.king.dexmorphhunter.model.data.ArgumentInfo
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
-class ArgumentsListAdapter(
-    private val arguments: List<ArgumentInfo>
+@AndroidEntryPoint
+class ArgumentsListAdapter @Inject constructor(
+        private val argumentList: List<ArgumentInfo>
     ) : RecyclerView.Adapter<ArgumentsListAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -17,11 +20,11 @@ class ArgumentsListAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val argument = arguments[position]
+        val argument = argumentList[position]
         holder.bind(argument)
     }
 
-    override fun getItemCount() = arguments.size
+    override fun getItemCount() = argumentList.size
 
     class ViewHolder(private val binding: ItemParameterListBinding) : RecyclerView.ViewHolder(binding.root) {
 

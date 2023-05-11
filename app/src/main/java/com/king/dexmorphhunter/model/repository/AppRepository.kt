@@ -9,43 +9,31 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
-import android.preference.PreferenceManager
 import android.util.Base64
 import androidx.lifecycle.ViewModel
 import com.king.dexmorphhunter.model.data.AppInfo
 import com.king.dexmorphhunter.model.data.AppSettings
-import com.king.dexmorphhunter.model.db.AppDatabase
+import com.king.dexmorphhunter.model.db.AppInfoDao
+import com.king.dexmorphhunter.model.db.AppSettingsDao
 import com.king.dexmorphhunter.model.util.Constants
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.util.*
+import javax.inject.Inject
 
-
-@Suppress("DEPRECATION", "NAME_SHADOWING")
-@SuppressLint("StaticFieldLeak")
-class AppRepository( val context: Context) : ViewModel() {
-
-    private val appDatabase = AppDatabase.getDatabase(context)
-    private val appSettingsDao = appDatabase.appSettingsDao()
-    private val appInfoDao = appDatabase.appInfoDao()
-
+@Suppress("DEPRECATION")
+@HiltViewModel
+class AppRepository @Inject constructor(
+        private val appSettingsDao: AppSettingsDao,
+        private val appInfoDao: AppInfoDao
+    ) : ViewModel() {
 
     @SuppressLint("QueryPermissionsNeeded")
     suspend fun loadInstalledAppList(context: Context): List<AppInfo> = withContext(Dispatchers.Main){
         val mAppList: List<AppInfo>
-        val settingsIsNull = getSettings() == null
-        if (settingsIsNull){
-            withContext(Dispatchers.IO) {
-                appSettingsDao.insertOrUpdateAppSettings(
-                    AppSettings(
-                        1,
-                        interceptedAppsSwitch = false,
-                        systemAppsSwitch = false
-                    )
-                )
-            }
-        }
+        setupConfig()
         val reloadCache = appInfoDao.getAll().isEmpty()
         if (reloadCache) {
             val pm: PackageManager by lazy { context.packageManager}
@@ -68,16 +56,8 @@ class AppRepository( val context: Context) : ViewModel() {
                             ?: false
                     appList.add(AppInfo(packageInfo.packageName, appName, isSystem, isIntercepted))
                     // Salva o cache no Room
-                    appInfoDao.insert(
-                        AppInfo(
-                            packageInfo.packageName,
-                            appName,
-                            isSystem,
-                            isIntercepted
-                        )
-                    )
+                    insertAll(appList)
                 }
-
 
                 val isIntercepted = appSettingsDao.getAppSettings()?.interceptedAppsSwitch ?: false
                 val isSystem = appSettingsDao.getAppSettings()?.systemAppsSwitch ?: false
@@ -94,19 +74,29 @@ class AppRepository( val context: Context) : ViewModel() {
         }
     }
 
-    fun updateIsIntercepted(context: Context, packageName: String, isIntercepted: Boolean) {
-        val sharedPrefs = context.getSharedPreferences("app_cache", Context.MODE_PRIVATE)
-        val editor = sharedPrefs.edit()
-        editor.putBoolean("${packageName}_intercepted_app", isIntercepted)
-        editor.apply()
+    private suspend fun setupConfig(){
+        val settingsIsNull = getSettings() == null
+        if (settingsIsNull) {
+            appSettingsDao.insertOrUpdateAppSettings(
+                AppSettings(
+                    1,
+                    interceptedAppsSwitch = false,
+                    systemAppsSwitch = false
+                )
+            )
+        }
+    }
+
+    suspend fun updateIsIntercepted(packageName: String, isIntercepted: Boolean) {
+        // Atualiza o valor de `isInterceptedApp` no banco de dados
+        appInfoDao.updateIsIntercepted(packageName, isIntercepted)
     }
 
     suspend fun invalidateCache(context: Context) {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        val editor = prefs.edit()
-        editor.clear()
-        editor.apply()
+        // Exclui todas as entradas do banco de dados
+        appInfoDao.deleteAll()
 
+        // Carrega a lista de aplicativos instalados
         loadInstalledAppList(context)
     }
 
@@ -124,15 +114,12 @@ class AppRepository( val context: Context) : ViewModel() {
     }
 
     suspend fun filterApps(
-        query: String?,
+        query: String? = "" ,
         isIntercepted: Boolean = false,
         isSystem: Boolean = false
     ): List<AppInfo> {
-        val query = query ?: ""
-        val isIntercepted = isIntercepted
-        val isSystem = isSystem
         return withContext(Dispatchers.IO) {
-            appInfoDao.testQuery(query = query, isSystem = isSystem, isIntercepted = isIntercepted)
+            appInfoDao.getFilterApps(query!!, isSystem, isIntercepted)
         }
     }
 
@@ -167,7 +154,7 @@ class AppRepository( val context: Context) : ViewModel() {
         return emptyList()
     }
 
-    suspend fun insertAll(appInfoList: List<AppInfo>) {
+    private suspend fun insertAll(appInfoList: List<AppInfo>) {
         withContext(Dispatchers.IO) {
             appInfoDao.insertAll(appInfoList)
         }
@@ -196,5 +183,5 @@ class AppRepository( val context: Context) : ViewModel() {
             appSettingsDao.insertOrUpdateAppSettings(appSettings)
         }
     }
-}
 
+}
