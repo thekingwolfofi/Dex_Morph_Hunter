@@ -11,7 +11,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
-@AndroidEntryPoint
 class PackageRemovedReceiver @Inject constructor(
         private val appSettingsDao: AppSettingsDao,
         private val appInfoDao: AppInfoDao

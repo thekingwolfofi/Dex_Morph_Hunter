@@ -15,7 +15,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 @Suppress("DEPRECATION")
-@AndroidEntryPoint
 class MethodListAdapter @Inject constructor(
     @ApplicationContext val context: Context,
     private var ClassAndMethodList: MutableList<String>
@@ -34,7 +33,7 @@ class MethodListAdapter @Inject constructor(
 
             if (isDeleteConfirmationVisible && adapterPosition == deleteConfirmationPosition) {
                 // Exibe o botão de exclusão e oculta o ícone de exclusão padrão
-                    binding.deleteIcon.visibility = View.VISIBLE
+                binding.deleteIcon.visibility = View.VISIBLE
 
                 // Define o clique no botão de exclusão para confirmar a exclusão
                 binding.deleteIcon.setOnClickListener {
@@ -127,6 +126,5 @@ class SwipeToDeleteCallback(
         // Notifica o adapter para atualizar a aparência dos itens
         adapter.notifyItemChanged(position)
     }
-
 
 }

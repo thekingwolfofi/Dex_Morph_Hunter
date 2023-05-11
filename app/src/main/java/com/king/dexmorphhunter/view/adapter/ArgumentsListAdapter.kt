@@ -9,7 +9,6 @@ import com.king.dexmorphhunter.model.data.ArgumentInfo
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-@AndroidEntryPoint
 class ArgumentsListAdapter @Inject constructor(
         private val argumentList: List<ArgumentInfo>
     ) : RecyclerView.Adapter<ArgumentsListAdapter.ViewHolder>() {

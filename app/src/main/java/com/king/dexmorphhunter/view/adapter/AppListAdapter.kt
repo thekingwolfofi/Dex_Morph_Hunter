@@ -15,7 +15,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
-@AndroidEntryPoint
 class AppListAdapter @Inject constructor(
     @ApplicationContext val context: Context,
     private val appListViewModel: AppListViewModel,

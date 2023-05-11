@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.king.dexmorphhunter.databinding.ActivityMainBinding
 import com.king.dexmorphhunter.model.data.AppInfo
+import com.king.dexmorphhunter.model.repository.AppRepository
 import com.king.dexmorphhunter.view.adapter.AppListAdapter
 import com.king.dexmorphhunter.viewmodel.AppListViewModel
 import com.king.dexmorphhunter.viewmodel.AppListViewModelFactory
@@ -18,7 +19,11 @@ import kotlinx.coroutines.*
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity @Inject constructor(private var viewModel: AppListViewModel, private var adapter: AppListAdapter) : AppCompatActivity() {
+class MainActivity @Inject constructor(
+        private var viewModel: AppListViewModel,
+        private var adapter: AppListAdapter,
+        private var appRepository: AppRepository
+    ) : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var progressBar: ProgressBar
@@ -40,7 +45,7 @@ class MainActivity @Inject constructor(private var viewModel: AppListViewModel, 
     private fun viewModelSetup(){
 
         // Inicializa o ViewModel
-        val viewModelFactory = AppListViewModelFactory(applicationContext)
+        val viewModelFactory = AppListViewModelFactory(applicationContext, appRepository)
         viewModel = ViewModelProvider(this, viewModelFactory)[AppListViewModel::class.java]
 
 

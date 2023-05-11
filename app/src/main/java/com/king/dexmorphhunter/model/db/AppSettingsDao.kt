@@ -18,11 +18,12 @@ interface AppSettingsDao {
     @Query("DELETE FROM app_settings")
     suspend fun deleteAll()
 
-    @Query("UPDATE app_settings SET interceptedAppsSwitch = :isIntercepted WHERE id = 1")
+    /*
+    @Query("UPDATE app_settings SET intercepted_Apps_Switch = :isIntercepted WHERE id = 1")
     fun updateInterceptedAppsSwitch(isIntercepted: Boolean)
 
     @Query("UPDATE app_settings SET systemAppsSwitch = :isSystemApp WHERE id = 1")
     fun updateSystemAppsSwitch(isSystemApp: Boolean)
-
+    */
 
 }

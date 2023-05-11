@@ -11,7 +11,6 @@ import com.king.dexmorphhunter.view.adapter.MethodListAdapter
 import dagger.hilt.android.AndroidEntryPoint
 
 @Suppress("NAME_SHADOWING")
-@AndroidEntryPoint
 class MethodSelectActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMethodListSelectBinding

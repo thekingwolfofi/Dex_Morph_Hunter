@@ -38,7 +38,7 @@ interface AppInfoDao {
     @Query("DELETE FROM app_info")
     suspend fun deleteAll()
 
-    @Query("UPDATE app_info SET is_intercepted_app = :isIntercepted WHERE package_name = :packageName")
+    @Query("UPDATE app_info SET is_intercepted_app = :isIntercepted WHERE packageName = :packageName")
     suspend fun updateIsIntercepted(packageName: String, isIntercepted: Boolean)
 
     fun testQuery(query: String, isSystem: Boolean, isIntercepted: Boolean): List<AppInfo> {

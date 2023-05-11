@@ -9,7 +9,6 @@ import com.king.dexmorphhunter.model.data.ArgumentInfo
 import com.king.dexmorphhunter.view.adapter.ArgumentsListAdapter
 import dagger.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint
 class ParameterEditorActivity : AppCompatActivity() {
     private lateinit var binding: ActivityParameterEditorBinding
     //private lateinit var viewModel: MethodSelectViewModel
