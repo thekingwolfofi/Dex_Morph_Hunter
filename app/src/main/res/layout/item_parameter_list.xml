@@ -12,7 +12,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            tools:ignore="SpeakableTextPresentCheck" />
+            tools:ignore="LabelFor,SpeakableTextPresentCheck,TextFields,VisualLintTextFieldSize"
+            android:autofillHints="" />
 
 
         <EditText
@@ -20,14 +21,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            tools:ignore="SpeakableTextPresentCheck" />
+            tools:ignore="LabelFor,SpeakableTextPresentCheck,TextFields,VisualLintTextFieldSize"
+            android:autofillHints="" />
 
         <EditText
             android:id="@+id/parameter_text_new_value"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            tools:ignore="SpeakableTextPresentCheck" />
+            tools:ignore="LabelFor,SpeakableTextPresentCheck,TextFields,VisualLintTextFieldSize"
+            android:autofillHints="" />
 
         <EditText
             android:id="@+id/parameter_numeric_value"
@@ -35,7 +38,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:inputType="numberDecimal"
-            android:visibility="gone" />
+            android:visibility="gone"
+            android:autofillHints=""
+            tools:ignore="LabelFor" />
 
         <EditText
             android:id="@+id/parameter_numeric_new_value"
@@ -43,7 +48,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:inputType="numberDecimal"
-            android:visibility="gone" />
+            android:visibility="gone"
+            android:autofillHints=""
+            tools:ignore="LabelFor" />
 
         <Switch
             android:id="@+id/parameter_value_boolean"

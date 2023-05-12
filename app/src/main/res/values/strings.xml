@@ -1,7 +1,18 @@
 <resources>
     <string name="app_name">Dex Morph Hunter</string>
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="icon_of_app">icone do app</string>
+    <string name="icon_of_app">Icone do app</string>
     <string name="info">Infos</string>
+    <string name="intercepted_apps">intercepted apps</string>
+    <string name="system_apps">system apps</string>
+    <string name="add">Add</string>
+    <string name="method">Method</string>
+    <string name="filter">filter</string>
+    <string name="package_name">Nome do Pacote</string>
+    <string name="name_table">Nome</string>
+    <string name="default_value">Valor Padrão</string>
+    <string name="current_value">Valor Atual</string>
+    <string name="app_name_text">App Name</string>
+    <string name="package_name_text">com.exple.app</string>
+    <string name="info_button">botão de informações</string>
 </resources>

@@ -32,7 +32,7 @@
 
                 <Spinner
                     android:id="@+id/classesSpinner"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:minHeight="48dp"
@@ -45,7 +45,7 @@
                     android:layout_height="48dp"
                     android:src="@drawable/filter_icon"
                     android:padding="4dp"
-                    />
+                    android:contentDescription="@string/filter" />
 
             </LinearLayout>
 
@@ -55,17 +55,18 @@
 
                 <Spinner
                     android:id="@+id/methodSpinner"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:hint="Method"
-                    android:minHeight="48dp"/>
+                    android:hint="@string/method"
+                    android:minHeight="48dp"
+                    tools:ignore="SpeakableTextPresentCheck" />
 
                 <Button
                     android:id="@+id/add_argument_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Add" />
+                    android:text="@string/add" />
 
             </LinearLayout>
         </LinearLayout>

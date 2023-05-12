@@ -10,7 +10,7 @@
         android:id="@+id/packageNameTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Nome do Pacote"
+        android:text="@string/package_name"
         android:textSize="24sp"
         android:textAlignment="center"
         android:padding="16dp"

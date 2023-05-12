@@ -25,19 +25,19 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Nome" />
+                    android:text="@string/name_table" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Valor Padrão" />
+                    android:text="@string/default_value" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Valor Atual" />
+                    android:text="@string/current_value" />
 
             </TableRow>
 

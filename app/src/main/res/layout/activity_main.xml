@@ -30,7 +30,7 @@
                 android:layout_width="192dp"
                 android:layout_height="wrap_content"
                 android:minHeight="48dp"
-                android:text="intercepted apps"
+                android:text="@string/intercepted_apps"
                 tools:ignore="UseSwitchCompatOrMaterialXml" />
 
             <Switch
@@ -38,7 +38,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="48dp"
-                android:text="system apps"
+                android:text="@string/system_apps"
                 tools:ignore="UseSwitchCompatOrMaterialXml,VisualLintButtonSize" />
 
         </LinearLayout>
