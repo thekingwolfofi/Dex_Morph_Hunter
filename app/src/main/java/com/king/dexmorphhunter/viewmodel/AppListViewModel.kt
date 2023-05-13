@@ -2,23 +2,21 @@ package com.king.dexmorphhunter.viewmodel
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.drawable.Drawable
+import android.graphics.Bitmap
 import androidx.lifecycle.*
 import com.king.dexmorphhunter.model.data.AppInfo
 import com.king.dexmorphhunter.model.data.AppSettings
 import com.king.dexmorphhunter.model.db.AppDatabase
 import com.king.dexmorphhunter.model.repository.AppRepository
 import com.king.dexmorphhunter.model.util.PackageUtils
-import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+import kotlinx.coroutines.withContext
 
 @Suppress("KotlinConstantConditions")
 @SuppressLint("StaticFieldLeak")
-@HiltViewModel
-class AppListViewModel @Inject constructor(
-        @ApplicationContext val context: Context,
+class AppListViewModel(
+        val context: Context,
         private val appRepository: AppRepository
     ) : ViewModel() {
 
@@ -44,7 +42,7 @@ class AppListViewModel @Inject constructor(
     }
 
     // Método para buscar ícone do aplicativo
-    fun getBitmapFromPackage(packageName: String): Drawable {
+    fun getBitmapFromPackage(packageName: String): Bitmap? {
         return appRepository.getBitmapFromPackage(context, packageName)
     }
 
@@ -62,8 +60,10 @@ class AppListViewModel @Inject constructor(
         }
     }
 
-    suspend fun updateIsIntercepted(packageName: String, isIntercepted: Boolean) {
-        appRepository.updateIsIntercepted( packageName, isIntercepted)
+    fun updateIsIntercepted(packageName: String, isIntercepted: Boolean) {
+        viewModelScope.launch {
+            appRepository.updateIsIntercepted(packageName, isIntercepted)
+        }
     }
 
     fun updateListApps() {
@@ -72,16 +72,25 @@ class AppListViewModel @Inject constructor(
             val interceptedApps = filterInterceptedApps.value ?: false
             val systemApps = filterSystemApps.value ?: false
 
-            val appSettingsDao = AppDatabase.getDatabase(context).appSettingsDao()
-            val settings = appSettingsDao.getAppSettings()
-            if (settings != null) {
-                if (settings.systemAppsSwitch != systemApps || settings.interceptedAppsSwitch != interceptedApps) {
-                    val appSettings = AppSettings(1, interceptedApps, systemApps)
-                    appRepository.updateSettings(appSettings)
+            val appDatabase = AppDatabase.getDatabase(context)
+            if (appDatabase != null) {
+                val settings = withContext(Dispatchers.IO) {
+                    val appSettingsDao = AppDatabase.getDatabase(context).appSettingsDao()
+                    appSettingsDao.getAppSettings()
                 }
+
+                if (settings != null) {
+                    if (settings.systemAppsSwitch != systemApps || settings.interceptedAppsSwitch != interceptedApps) {
+                        val appSettings = AppSettings(1, interceptedApps, systemApps)
+                        appRepository.updateSettings(appSettings)
+                    }
+                }
+
+                val appList = withContext(Dispatchers.IO) {
+                    appRepository.filterApps(query, interceptedApps, systemApps)
+                }
+                _appList.postValue(appList)
             }
-            val appList = appRepository.filterApps(query,interceptedApps, systemApps)
-            _appList.postValue(appList)
         }
     }
 

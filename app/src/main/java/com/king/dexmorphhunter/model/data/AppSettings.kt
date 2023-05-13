@@ -8,8 +8,8 @@ import androidx.room.PrimaryKey
 data class AppSettings(
     @PrimaryKey
     val id: Int = 1,
-    @ColumnInfo(name = "intercepted_apps_switch")
+    @ColumnInfo(name = "intercepted_Apps_Switch")
     val interceptedAppsSwitch: Boolean,
-    @ColumnInfo(name = "system_apps_switch")
+    @ColumnInfo(name = "system_Apps_Switch")
     val systemAppsSwitch: Boolean
 )

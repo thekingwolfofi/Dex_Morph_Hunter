@@ -8,11 +8,13 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import android.util.Base64
 import androidx.lifecycle.ViewModel
 import com.king.dexmorphhunter.model.data.AppInfo
 import com.king.dexmorphhunter.model.data.AppSettings
+import com.king.dexmorphhunter.model.db.AppDatabase
 import com.king.dexmorphhunter.model.db.AppInfoDao
 import com.king.dexmorphhunter.model.db.AppSettingsDao
 import com.king.dexmorphhunter.model.util.Constants
@@ -26,9 +28,11 @@ import javax.inject.Inject
 @Suppress("DEPRECATION")
 @HiltViewModel
 class AppRepository @Inject constructor(
-        private val appSettingsDao: AppSettingsDao,
-        private val appInfoDao: AppInfoDao
-    ) : ViewModel() {
+    appDatabase: AppDatabase
+) : ViewModel() {
+
+    private var appSettingsDao: AppSettingsDao = appDatabase.appSettingsDao()
+    private var appInfoDao: AppInfoDao = appDatabase.appInfoDao()
 
     @SuppressLint("QueryPermissionsNeeded")
     suspend fun loadInstalledAppList(context: Context): List<AppInfo> = withContext(Dispatchers.Main){
@@ -77,13 +81,15 @@ class AppRepository @Inject constructor(
     private suspend fun setupConfig(){
         val settingsIsNull = getSettings() == null
         if (settingsIsNull) {
-            appSettingsDao.insertOrUpdateAppSettings(
-                AppSettings(
-                    1,
-                    interceptedAppsSwitch = false,
-                    systemAppsSwitch = false
+            withContext(Dispatchers.IO) {
+                appSettingsDao.insertOrUpdateAppSettings(
+                    AppSettings(
+                        1,
+                        interceptedAppsSwitch = false,
+                        systemAppsSwitch = false
+                    )
                 )
-            )
+            }
         }
     }
 
@@ -100,12 +106,21 @@ class AppRepository @Inject constructor(
         loadInstalledAppList(context)
     }
 
-    @Suppress("DEPRECATION")
-    fun getBitmapFromPackage(context: Context, packageName: String): Drawable {
-        val pm = context.packageManager
-        val applicationInfo = pm.getApplicationInfo(packageName, 0)
-        return pm.getApplicationIcon(applicationInfo)
+    fun getBitmapFromPackage(context: Context, packageName: String): Bitmap? {
+        return try {
+            val packageManager = context.packageManager
+            val appInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
+            val appIcon = appInfo.loadIcon(packageManager)
+            val appBitmap = Bitmap.createBitmap(appIcon.intrinsicWidth, appIcon.intrinsicHeight, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(appBitmap)
+            appIcon.setBounds(0, 0, canvas.width, canvas.height)
+            appIcon.draw(canvas)
+            appBitmap
+        } catch (e: Exception) {
+            null
+        }
     }
+
 
     private fun isSystemApp(context: Context, packageName: String): Boolean {
         val pm = context.packageManager

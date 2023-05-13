@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Dex Morph Hunter</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="icon_of_app">Icone do app</string>
     <string name="info">Infos</string>
     <string name="intercepted_apps">intercepted apps</string>

@@ -19,12 +19,11 @@ import kotlinx.coroutines.*
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity @Inject constructor(
-        private var viewModel: AppListViewModel,
-        private var adapter: AppListAdapter,
-        private var appRepository: AppRepository
-    ) : AppCompatActivity() {
+class MainActivity () : AppCompatActivity() {
 
+    @Inject lateinit var viewModel: AppListViewModel
+    @Inject lateinit var adapter: AppListAdapter
+    @Inject lateinit var appRepository: AppRepository
     private lateinit var binding: ActivityMainBinding
     private lateinit var progressBar: ProgressBar
 

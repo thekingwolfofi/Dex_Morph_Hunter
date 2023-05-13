@@ -8,9 +8,11 @@ import androidx.room.TypeConverters
 import com.king.dexmorphhunter.model.data.AppInfo
 import com.king.dexmorphhunter.model.data.AppSettings
 import com.king.dexmorphhunter.model.util.Converters
+import javax.inject.Singleton
 
 @Database(entities = [AppSettings::class, AppInfo::class], version = 1, exportSchema = false)
 @TypeConverters(Converters::class)
+@Singleton
 abstract class AppDatabase : RoomDatabase() {
     abstract fun appSettingsDao(): AppSettingsDao
     abstract fun appInfoDao(): AppInfoDao

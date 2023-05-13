@@ -3,6 +3,7 @@ package com.king.dexmorphhunter.model.db
 import android.util.Log
 import androidx.room.*
 import com.king.dexmorphhunter.model.data.AppInfo
+import dagger.hilt.android.scopes.ActivityScoped
 
 @Dao
 interface AppInfoDao {
