@@ -11,6 +11,6 @@ data class AppInfo(
     val isSystemApp: Boolean? = null,
     @ColumnInfo(name = "is_intercepted_app")
     val isInterceptedApp: Boolean? = null,
-    @ColumnInfo(name = "clazzes_intercepted")
-    val clazzIntercepted: List<String>? = null
+    @ColumnInfo(name = "classes_intercepted")
+    val classIntercepted: List<ClassInfo>? = null
 )

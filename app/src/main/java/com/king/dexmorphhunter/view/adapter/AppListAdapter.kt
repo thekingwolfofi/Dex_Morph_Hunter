@@ -13,11 +13,10 @@ import com.king.dexmorphhunter.model.data.AppInfo
 import com.king.dexmorphhunter.model.util.Constants.removePackage
 import com.king.dexmorphhunter.view.MethodSelectActivity
 import com.king.dexmorphhunter.viewmodel.AppListViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 class AppListAdapter @Inject constructor(
-    @ApplicationContext val context: Context,
+    private val context: Context,
     private val appListViewModel: AppListViewModel,
     private var updateIsIntercepted: ((packageName: String, isIntercepted: Boolean) -> Unit),
     private var getBitmapFromPackage: ((packageName: String) -> Bitmap?)
@@ -78,6 +77,7 @@ class AppListAdapter @Inject constructor(
                     itemBinding.appInterceptionSwitch.isEnabled = false
                 } else {
                     intent.putExtra("packageName", appInfo.packageName)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     context.startActivity(intent)
                     updateIsIntercepted(
                         appInfo.packageName,
