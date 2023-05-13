@@ -7,10 +7,7 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Canvas
-import android.graphics.drawable.Drawable
-import android.util.Base64
 import androidx.lifecycle.ViewModel
 import com.king.dexmorphhunter.model.data.AppInfo
 import com.king.dexmorphhunter.model.data.AppSettings
@@ -21,7 +18,6 @@ import com.king.dexmorphhunter.model.util.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.ByteArrayOutputStream
 import java.util.*
 import javax.inject.Inject
 
@@ -50,18 +46,16 @@ class AppRepository @Inject constructor(
                     ) {
                         continue
                     }
-                    if (packageInfo.packageName in Constants.importantPackagesList) {
-                        continue
-                    }
                     val appName = pm.getApplicationLabel(packageInfo.applicationInfo).toString()
                     val isSystem = isSystemApp(context, packageInfo.packageName)
                     val isIntercepted =
                         appInfoDao.getByPackageName(packageInfo.packageName)?.isInterceptedApp
                             ?: false
                     appList.add(AppInfo(packageInfo.packageName, appName, isSystem, isIntercepted))
-                    // Salva o cache no Room
-                    insertAll(appList)
+
                 }
+                // Salva a lista de apps no cache com Room
+                insertAll(appList)
 
                 val isIntercepted = appSettingsDao.getAppSettings()?.interceptedAppsSwitch ?: false
                 val isSystem = appSettingsDao.getAppSettings()?.systemAppsSwitch ?: false
@@ -79,7 +73,7 @@ class AppRepository @Inject constructor(
     }
 
     private suspend fun setupConfig(){
-        val settingsIsNull = getSettings() == null
+        val settingsIsNull = getSettings()
         if (settingsIsNull) {
             withContext(Dispatchers.IO) {
                 appSettingsDao.insertOrUpdateAppSettings(
@@ -101,6 +95,7 @@ class AppRepository @Inject constructor(
     suspend fun invalidateCache(context: Context) {
         // Exclui todas as entradas do banco de dados
         appInfoDao.deleteAll()
+        appSettingsDao.deleteAll()
 
         // Carrega a lista de aplicativos instalados
         loadInstalledAppList(context)
@@ -138,6 +133,7 @@ class AppRepository @Inject constructor(
         }
     }
 
+    /*
     private fun encodeBitmap(bitmap: Bitmap?): String? {
         if (bitmap == null) {
             return null
@@ -156,6 +152,8 @@ class AppRepository @Inject constructor(
         return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
     }
 
+
+
     fun updateListApps(
         filterSystemApps: Boolean,
         filterInterceptedApps: Boolean
@@ -168,6 +166,7 @@ class AppRepository @Inject constructor(
         ))
         return emptyList()
     }
+     */
 
     private suspend fun insertAll(appInfoList: List<AppInfo>) {
         withContext(Dispatchers.IO) {
@@ -175,6 +174,7 @@ class AppRepository @Inject constructor(
         }
     }
 
+    /*
     suspend fun getAll(): List<AppInfo> {
         return withContext(Dispatchers.IO) {
             appInfoDao.getAll()
@@ -186,10 +186,12 @@ class AppRepository @Inject constructor(
             appInfoDao.getByPackageName(packageName)
         }
     }
+     */
 
-    private suspend fun getSettings(): AppSettings? {
+    private suspend fun getSettings(): Boolean {
         return withContext(Dispatchers.IO) {
-            appSettingsDao.getAppSettings()
+            val count = appSettingsDao.isAppSettingsTableEmpty()
+            count == 0
         }
     }
 

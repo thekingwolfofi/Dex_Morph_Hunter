@@ -1,12 +1,10 @@
 package com.king.dexmorphhunter.model.db
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.king.dexmorphhunter.model.data.AppSettings
-import dagger.hilt.android.scopes.ActivityScoped
 
 @Dao
 interface AppSettingsDao {
@@ -18,6 +16,9 @@ interface AppSettingsDao {
 
     @Query("DELETE FROM app_settings")
     suspend fun deleteAll()
+
+    @Query("SELECT COUNT(*) FROM app_settings")
+    fun isAppSettingsTableEmpty(): Int
 
     @Query("UPDATE app_settings SET intercepted_Apps_Switch = :isIntercepted WHERE id = 1")
     fun updateInterceptedAppsSwitch(isIntercepted: Boolean)

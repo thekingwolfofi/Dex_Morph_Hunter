@@ -6,7 +6,6 @@ import android.view.View
 import android.widget.ProgressBar
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.king.dexmorphhunter.databinding.ActivityMainBinding
 import com.king.dexmorphhunter.model.data.AppInfo
@@ -51,8 +50,9 @@ class MainActivity () : AppCompatActivity() {
         // Observe as mudanças na lista de aplicativos
         viewModel.appList.observe(this) { newList ->
             appList = newList ?: emptyList()
+            adapter.updateList(appList)
             //adapter = AppListAdapter(this, appList, viewModel::updateIsIntercepted,viewModel::getBitmapFromPackage)
-            binding.appListRecyclerView.adapter = adapter
+            //binding.appListRecyclerView.adapter = adapter
         }
 
         viewModel.filterInterceptedApps.observe(this){
@@ -68,17 +68,17 @@ class MainActivity () : AppCompatActivity() {
         }
     }
     private fun bindingSetup(){
-
+        
         // Inicializa a view binding
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         // Inicializa o RecyclerView
         binding.appListRecyclerView.layoutManager = LinearLayoutManager(this)
-
-        // Adiciona um item de decoração ao RecyclerView (opcional)
-        binding.appListRecyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
-
+        
+        // adiciona o adapter ao recycleview
+        binding.appListRecyclerView.adapter = adapter
+        
         binding.interceptedAppsSwitch.setOnCheckedChangeListener { _, isChecked ->
             val job = Job()
             val scope = CoroutineScope(Dispatchers.Main + job)

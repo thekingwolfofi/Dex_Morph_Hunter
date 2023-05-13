@@ -1,5 +1,6 @@
 package com.king.dexmorphhunter.view.adapter
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -9,9 +10,9 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.king.dexmorphhunter.databinding.ItemAppBinding
 import com.king.dexmorphhunter.model.data.AppInfo
+import com.king.dexmorphhunter.model.util.Constants.removePackage
 import com.king.dexmorphhunter.view.MethodSelectActivity
 import com.king.dexmorphhunter.viewmodel.AppListViewModel
-import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -28,14 +29,6 @@ class AppListAdapter @Inject constructor(
         val diffResult = DiffUtil.calculateDiff(AppListDiffUtilCallback(this.appList, appList))
         this.appList = appList
         diffResult.dispatchUpdatesTo(this)
-    }
-
-    fun setOnUpdateIsInterceptedListener(listener: ((packageName: String, isIntercepted: Boolean) -> Unit)) {
-        this.updateIsIntercepted = listener
-    }
-
-    fun setOnGetBitmapFromPackageListener(listener: ((packageName: String) -> Bitmap?)) {
-        this.getBitmapFromPackage = listener
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppListViewHolder {
@@ -59,7 +52,7 @@ class AppListAdapter @Inject constructor(
         fun bind(appInfo: AppInfo) {
             itemBinding.appName.text = appInfo.appName
             itemBinding.appPackage.text = appInfo.packageName
-            itemBinding.appIcon.setImageBitmap(getBitmapFromPackage?.let { it(appInfo.packageName) })
+            itemBinding.appIcon.setImageBitmap(getBitmapFromPackage(appInfo.packageName))
             itemBinding.appInterceptionSwitch.isChecked = appInfo.isInterceptedApp ?: false
 
             itemBinding.appInterceptionSwitch.setOnCheckedChangeListener { _, _  ->
@@ -72,18 +65,26 @@ class AppListAdapter @Inject constructor(
 
         }
 
+        @SuppressLint("SetTextI18n")
         private fun updateInterceptSwitch(appInfo: AppInfo) {
-
-            val intent = Intent(context, MethodSelectActivity::class.java)
-            itemBinding.appInterceptionSwitch.isChecked = true
-
             classList = appListViewModel.getExtractedClassesFromApp(context, appInfo.packageName)
             if(classList.isNotEmpty()) {
-                intent.putExtra("packageName", appInfo.packageName)
-                context.startActivity(intent)
-                updateIsIntercepted(appInfo.packageName,itemBinding.appInterceptionSwitch.isChecked)
-
-            } else{
+                val intent = Intent(context, MethodSelectActivity::class.java)
+                itemBinding.appInterceptionSwitch.isChecked = true
+                val isRemovedApp = removePackage.any { it in appInfo.appName || it in appInfo.packageName }
+                if (isRemovedApp) {
+                    itemBinding.appPackage.text = "Block App"
+                    itemBinding.appInterceptionSwitch.isChecked = false
+                    itemBinding.appInterceptionSwitch.isEnabled = false
+                } else {
+                    intent.putExtra("packageName", appInfo.packageName)
+                    context.startActivity(intent)
+                    updateIsIntercepted(
+                        appInfo.packageName,
+                        itemBinding.appInterceptionSwitch.isChecked
+                    )
+                }
+            } else {
                 itemBinding.appPackage.text = "Empty Classes"
                 itemBinding.appInterceptionSwitch.isChecked = false
                 itemBinding.appInterceptionSwitch.isEnabled = false
