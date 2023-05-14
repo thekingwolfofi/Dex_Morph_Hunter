@@ -3,7 +3,6 @@ package com.king.dexmorphhunter.model.db
 import android.util.Log
 import androidx.room.*
 import com.king.dexmorphhunter.model.data.AppInfo
-import dagger.hilt.android.scopes.ActivityScoped
 
 @Dao
 interface AppInfoDao {
@@ -23,26 +22,26 @@ interface AppInfoDao {
     @Query("SELECT * FROM app_info")
     suspend fun getAll(): List<AppInfo>
 
-    @Query("SELECT * FROM app_info WHERE packageName = :packageName")
+    @Query("SELECT * FROM app_info WHERE package_name = :packageName")
     suspend fun getByPackageName(packageName: String): AppInfo?
 
     @Query("SELECT * FROM app_info WHERE (" +
             "(:query IS NULL OR :query = '') " +
-            "OR LOWER(appName) LIKE '%' || LOWER(:query) || '%' " +
-            "OR LOWER(packageName) LIKE '%' || LOWER(:query) || '%') " +
+            "OR LOWER(app_name) LIKE '%' || LOWER(:query) || '%' " +
+            "OR LOWER(package_name) LIKE '%' || LOWER(:query) || '%') " +
             "AND (is_system_app = 0 OR (is_system_app = 1 AND :isSystem = 1) OR :isIntercepted = 1) " +
             "AND ((:isIntercepted = 1 AND (is_intercepted_app = 1 AND :isIntercepted = 1)) OR :isIntercepted = 0) " +
-            "ORDER BY appName ASC"
+            "ORDER BY app_name ASC"
     )
     fun getFilterApps(query: String, isSystem: Boolean, isIntercepted: Boolean): List<AppInfo>
 
     @Query("DELETE FROM app_info")
     suspend fun deleteAll()
 
-    @Query("UPDATE app_info SET is_intercepted_app = :isIntercepted WHERE packageName = :packageName")
+    @Query("UPDATE app_info SET is_intercepted_app = :isIntercepted WHERE package_name = :packageName")
     suspend fun updateIsIntercepted(packageName: String, isIntercepted: Boolean)
 
-    fun testQuery(query: String, isSystem: Boolean, isIntercepted: Boolean): List<AppInfo> {
+    suspend fun testQuery(query: String, isSystem: Boolean, isIntercepted: Boolean): List<AppInfo> {
         val apps = getFilterApps(query, isSystem, isIntercepted)
         for(app in apps) {
             if(app.isSystemApp == true) {
@@ -68,7 +67,7 @@ interface AppInfoDao {
                 } else {
                     Log.d("QUERY_TEST", "systemApp não é igual a isSystem que é $isSystem")
                 }
-                if ((systemApp == false || (systemApp == true && isSystem == true) || isIntercepted == true)) {
+                if ((systemApp == false || (systemApp == true && isSystem) || isIntercepted)) {
                     Log.d(
                         "QUERY_TEST",
                         "aprovou no (systemApp == false || (systemApp == true && isSystem == true) || isIntercepted == true) "
@@ -79,7 +78,7 @@ interface AppInfoDao {
                         "reprovou no (systemApp == false || (systemApp == true && isSystem == true) || isIntercepted == true) "
                     )
                 }
-                if (((isIntercepted == true && (interceptedApp == true && isIntercepted == true)) || isIntercepted == false)) {
+                if (((isIntercepted && (interceptedApp == true && isIntercepted)) || !isIntercepted)) {
                     Log.d(
                         "QUERY_TEST",
                         "aprovou no ((isIntercepted == true && (interceptedApp == true && isIntercepted == true)) || isIntercepted == false) "

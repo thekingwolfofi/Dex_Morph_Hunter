@@ -53,8 +53,7 @@ class Converters {
             packageName = packageName,
             appName = appName,
             isSystemApp = isSystemApp,
-            isInterceptedApp = isInterceptedApp,
-            classIntercepted = classInterceptedList
+            isInterceptedApp = isInterceptedApp
         )
     }
 
@@ -86,5 +85,28 @@ class Converters {
     @TypeConverter
     fun toArgumentInfoList(value: String?): List<ArgumentInfo>? {
         return gson.fromJson(value, object : TypeToken<List<ArgumentInfo>>() {}.type)
+    }
+
+    @TypeConverter
+    fun fromAny(any: Any?): String? {
+        return Gson().toJson(any)
+    }
+
+    @TypeConverter
+    fun toAny(json: String?): Any? {
+        return Gson().fromJson(json, Any::class.java)
+    }
+    @TypeConverter
+    fun toClass(value: String?): Class<*>? {
+        return try {
+            Class.forName(value)
+        } catch (e: ClassNotFoundException) {
+            null
+        }
+    }
+
+    @TypeConverter
+    fun fromClass(value: Class<*>?): String? {
+        return value?.name
     }
 }

@@ -18,7 +18,7 @@ import kotlinx.coroutines.*
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity () : AppCompatActivity() {
+class MainActivity : AppCompatActivity() {
 
     @Inject lateinit var viewModel: AppListViewModel
     @Inject lateinit var adapter: AppListAdapter
@@ -45,7 +45,6 @@ class MainActivity () : AppCompatActivity() {
         // Inicializa o ViewModel
         val viewModelFactory = AppListViewModelFactory(applicationContext, appRepository)
         viewModel = ViewModelProvider(this, viewModelFactory)[AppListViewModel::class.java]
-
 
         // Observe as mudanças na lista de aplicativos
         viewModel.appList.observe(this) { newList ->

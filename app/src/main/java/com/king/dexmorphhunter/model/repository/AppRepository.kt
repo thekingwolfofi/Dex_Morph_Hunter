@@ -11,6 +11,7 @@ import android.graphics.Canvas
 import androidx.lifecycle.ViewModel
 import com.king.dexmorphhunter.model.data.AppInfo
 import com.king.dexmorphhunter.model.data.AppSettings
+import com.king.dexmorphhunter.model.data.ClassInfo
 import com.king.dexmorphhunter.model.db.AppDatabase
 import com.king.dexmorphhunter.model.db.AppInfoDao
 import com.king.dexmorphhunter.model.db.AppSettingsDao
@@ -90,6 +91,11 @@ class AppRepository @Inject constructor(
     suspend fun updateIsIntercepted(packageName: String, isIntercepted: Boolean) {
         // Atualiza o valor de `isInterceptedApp` no banco de dados
         appInfoDao.updateIsIntercepted(packageName, isIntercepted)
+    }
+
+    suspend fun updateClass(packageName: String, classList: List<ClassInfo>){
+        // Atualiza o valor de `classIntercepted` no banco de dados
+        appInfoDao.updateClasses(packageName, classList)
     }
 
     suspend fun invalidateCache(context: Context) {

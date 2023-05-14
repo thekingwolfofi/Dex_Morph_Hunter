@@ -1,28 +1,29 @@
-package com.king.dexmorphhunter.model.app
+package com.king.dexmorphhunter.model.di
 
 import android.content.Context
 import android.graphics.Bitmap
 import androidx.lifecycle.ViewModelProvider
 import androidx.room.Room
-import com.king.dexmorphhunter.model.PackageRemovedReceiver
+import com.king.dexmorphhunter.App
 import com.king.dexmorphhunter.model.data.ArgumentInfo
 import com.king.dexmorphhunter.model.db.AppDatabase
 import com.king.dexmorphhunter.model.db.AppInfoDao
 import com.king.dexmorphhunter.model.db.AppSettingsDao
 import com.king.dexmorphhunter.model.repository.AppRepository
-import com.king.dexmorphhunter.view.MainActivity
+import com.king.dexmorphhunter.model.util.ClassesPackageUtils
+import com.king.dexmorphhunter.xposed.MethodExtractorXposedModule
 import com.king.dexmorphhunter.view.adapter.AppListAdapter
 import com.king.dexmorphhunter.view.adapter.ArgumentsListAdapter
 import com.king.dexmorphhunter.view.adapter.MethodListAdapter
 import com.king.dexmorphhunter.viewmodel.AppListViewModel
 import com.king.dexmorphhunter.viewmodel.AppListViewModelFactory
+import com.king.dexmorphhunter.viewmodel.MethodSelectViewModel
+import com.king.dexmorphhunter.viewmodel.MethodSelectViewModelFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
-import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Singleton
 
 @Module
 @InstallIn(ActivityComponent::class)
@@ -99,10 +100,9 @@ object AppModule {
 
     @Provides
     fun provideMethodListAdapter(
-            @ApplicationContext context: Context,
-            ClassAndMethodList: MutableList<String>
+            context: Context
         ): MethodListAdapter {
-            return MethodListAdapter(context,ClassAndMethodList)
+            return MethodListAdapter(context)
         }
 
     @Provides
@@ -112,31 +112,25 @@ object AppModule {
         return ArgumentsListAdapter(argumentList)
     }
 
-}
-
-@Module
-@InstallIn(ViewModelComponent::class)
-object ViewModelModule {
     @Provides
-    fun provideContext(): Context {
-        return App.instance.applicationContext
+    fun provideMethodExtractorXposedModule(): MethodExtractorXposedModule {
+        return MethodExtractorXposedModule()
     }
 
     @Provides
-    fun provideAppSettingsDao(appDatabase: AppDatabase): AppSettingsDao{
-        return appDatabase.appSettingsDao()
+    fun provideClassesPackageUtils(): ClassesPackageUtils {
+        return ClassesPackageUtils
     }
 
     @Provides
-    fun provideAppInfoDao(appDatabase: AppDatabase): AppInfoDao {
-        return appDatabase.appInfoDao()
+    fun provideMethodSelectViewModel(
+        context: Context
+    ): MethodSelectViewModel {
+        return MethodSelectViewModel(context)
     }
-
     @Provides
-    fun provideAppDatabase(@ApplicationContext appContext: Context): AppDatabase {
-        return Room.databaseBuilder(
-            appContext,
-            AppDatabase::class.java, "app-database"
-        ).build()
+    fun provideMethodSelectViewModelFactory(context: Context): MethodSelectViewModelFactory {
+        return MethodSelectViewModelFactory(context)
     }
 }
+

@@ -5,36 +5,11 @@ import android.content.Context
 import android.content.pm.PackageManager
 import dalvik.system.DexFile
 
-object PackageUtils {
-    /*
-    private var convertDataUtils: ConvertDataUtils = ConvertDataUtils()
+object ClassesPackageUtils {
 
-    fun onExistCache(context: Context,packageName: String):Boolean{
-        // Instancia o cache do aplicativo para class_info
-        val prefs = context.getSharedPreferences("class_info", Context.MODE_PRIVATE)
-        return prefs.getString("${packageName}_class_info", null)!= null
-    }
-
-
-    fun getClassListFromCache(context: Context, packageName: String): List<ClassInfo> {
-        val prefs = context.getSharedPreferences("class_info", Context.MODE_PRIVATE)
-        val classesString = prefs.getString("${packageName}_class_info", null)
-
-        return if (classesString != null) {
-            convertDataUtils.stringToClassInfo(classesString)
-        } else {
-            emptyList()
-        }
-    }
-    */
     fun getListClassesInPackage(context: Context, packageName: String): List<String> {
         // Lista de classes que serão retornadas pela função
         val classes = mutableListOf<String>()
-
-        // Instancia o cache do aplicativo para class_info
-        //val prefs = context.getSharedPreferences("class_info", Context.MODE_PRIVATE)
-        // Instancia o editor de cache
-        //val editor = prefs.edit()
 
         try {
             // Contexto do pacote desejado

@@ -1,4 +1,4 @@
-package com.king.dexmorphhunter.model.app
+package com.king.dexmorphhunter
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp

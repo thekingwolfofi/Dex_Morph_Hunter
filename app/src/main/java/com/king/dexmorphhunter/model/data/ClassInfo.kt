@@ -1,6 +1,13 @@
 package com.king.dexmorphhunter.model.data
 
+import androidx.room.*
+
+@Entity(
+    tableName = "class_info")
 data class ClassInfo(
-    val packageClass: String,
-    val methodsIntercepted: List<MethodInfo>? = null
+    @PrimaryKey
+    @ColumnInfo(name = "class_name")
+    val className: String,
+    @ColumnInfo(name = "package_name")
+    val packageName: String
 )

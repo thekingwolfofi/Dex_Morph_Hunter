@@ -8,7 +8,7 @@ import com.king.dexmorphhunter.model.data.AppInfo
 import com.king.dexmorphhunter.model.data.AppSettings
 import com.king.dexmorphhunter.model.db.AppDatabase
 import com.king.dexmorphhunter.model.repository.AppRepository
-import com.king.dexmorphhunter.model.util.PackageUtils
+import com.king.dexmorphhunter.model.util.ClassesPackageUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -95,7 +95,7 @@ class AppListViewModel(
     }
 
     fun getExtractedClassesFromApp(context: Context, packageName: String): List<String> {
-        return PackageUtils.getListClassesInPackage(context, packageName)
+        return ClassesPackageUtils.getListClassesInPackage(context, packageName)
     }
 
 }

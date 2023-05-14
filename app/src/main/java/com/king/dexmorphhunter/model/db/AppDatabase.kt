@@ -5,17 +5,20 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.king.dexmorphhunter.model.data.AppInfo
-import com.king.dexmorphhunter.model.data.AppSettings
+import com.king.dexmorphhunter.model.data.*
 import com.king.dexmorphhunter.model.util.Converters
 import javax.inject.Singleton
 
-@Database(entities = [AppSettings::class, AppInfo::class], version = 1, exportSchema = false)
+@Database(entities = [AppSettings::class, AppInfo::class, ClassInfo::class, MethodInfo::class, ArgumentInfo::class], version = 1, exportSchema = false)
 @TypeConverters(Converters::class)
 @Singleton
 abstract class AppDatabase : RoomDatabase() {
     abstract fun appSettingsDao(): AppSettingsDao
     abstract fun appInfoDao(): AppInfoDao
+    abstract fun argumentInfoDao(): ArgumentInfoDao
+    abstract fun classInfoDao(): ClassInfoDao
+    abstract fun methodInfoDao(): MethodInfoDao
+
 
     companion object {
         @Volatile

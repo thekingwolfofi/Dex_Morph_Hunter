@@ -1,6 +1,5 @@
-package com.king.dexmorphhunter.model.xposed
+package com.king.dexmorphhunter.xposed
 
-import android.util.Log
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
@@ -10,15 +9,7 @@ class MethodExtractorXposedModule: IXposedHookLoadPackage {
     // Este método é chamado quando um pacote é carregado pelo sistema
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam?) {
         // Aqui você pode verificar se o pacote que foi carregado é o que você deseja modificar.
-        // Se sim, você pode adicionar a lógica do seu módulo aqui.
-        if (lpparam?.packageName == "com.meuaplicativo.alvo") {
-            // Aqui estamos obtendo o nome de todos os métodos de uma classe específica
-            val methodNames = getAllMethodNames("com.meuaplicativo.alvo.MinhaClasse")
-            // Agora podemos imprimir os nomes dos métodos no log do sistema
-            for (name in methodNames) {
-                Log.d("MethodExtractor", "Found method: $name")
-            }
-        }
+
     }
 
     // Este método retorna uma lista de nomes de método para uma determinada classe

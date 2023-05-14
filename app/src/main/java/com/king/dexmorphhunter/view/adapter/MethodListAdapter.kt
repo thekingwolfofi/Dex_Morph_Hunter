@@ -6,19 +6,19 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.king.dexmorphhunter.databinding.ItemListMethodBinding
 import com.king.dexmorphhunter.view.ParameterEditorActivity
-import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 @Suppress("DEPRECATION")
 class MethodListAdapter @Inject constructor(
-    @ApplicationContext val context: Context,
-    private var ClassAndMethodList: MutableList<String>
+    val context: Context
 ) : RecyclerView.Adapter<MethodListAdapter.ViewHolder>() {
+
+    private lateinit var classAndMethodList: LiveData<List<String>>
 
     var swipedPosition = -1
     var deleteConfirmationPosition = -1
@@ -59,14 +59,14 @@ class MethodListAdapter @Inject constructor(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val methodInfo: String = ClassAndMethodList[position]
+        val methodInfo: String = classAndMethodList[position]
         holder.bind(methodInfo)
     }
 
-    override fun getItemCount(): Int = ClassAndMethodList.size
+    override fun getItemCount(): Int = classAndMethodList.value.size
 
     fun deleteItem(position: Int) {
-        ClassAndMethodList.removeAt(position)
+        classAndMethodList.removeAt(position)
         notifyItemRemoved(position)
 
         // Redefine as variáveis de confirmação para ocultar o botão de exclusão
@@ -77,14 +77,14 @@ class MethodListAdapter @Inject constructor(
     }
 
     private fun updateItemPositions() {
-        for (i in 0 until ClassAndMethodList.size) {
+        for (i in 0 until classAndMethodList.size) {
             notifyItemChanged(i)
         }
     }
 
     @SuppressLint("NotifyDataSetChanged")
     fun addItem(classInfo: String) {
-        ClassAndMethodList.add(classInfo)
+        classAndMethodList.add(classInfo)
         notifyDataSetChanged()
     }
 
@@ -93,38 +93,6 @@ class MethodListAdapter @Inject constructor(
         val swipeToDeleteCallback = SwipeToDeleteCallback(this)
         val itemTouchHelper = ItemTouchHelper(swipeToDeleteCallback)
         itemTouchHelper.attachToRecyclerView(recyclerView)
-    }
-
-}
-
-@Suppress("DEPRECATION")
-class SwipeToDeleteCallback(
-    private val adapter: MethodListAdapter
-) : ItemTouchHelper.SimpleCallback(
-    ItemTouchHelper.UP or ItemTouchHelper.DOWN,
-    ItemTouchHelper.START or ItemTouchHelper.END
-) {
-
-    override fun onMove(
-        recyclerView: RecyclerView,
-        viewHolder: RecyclerView.ViewHolder,
-        target: RecyclerView.ViewHolder
-    ): Boolean {
-        return false
-    }
-
-    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-        val position = viewHolder.adapterPosition
-
-        // Define as posições do item deslizado e do item de confirmação
-        adapter.swipedPosition = position
-        adapter.deleteConfirmationPosition = position
-
-        adapter.isDeleteConfirmationVisible =
-            !(direction == ItemTouchHelper.LEFT || direction == ItemTouchHelper.RIGHT)
-
-        // Notifica o adapter para atualizar a aparência dos itens
-        adapter.notifyItemChanged(position)
     }
 
 }
