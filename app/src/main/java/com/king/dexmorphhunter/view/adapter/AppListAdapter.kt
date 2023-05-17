@@ -16,10 +16,10 @@ import com.king.dexmorphhunter.viewmodel.AppListViewModel
 import javax.inject.Inject
 
 class AppListAdapter @Inject constructor(
-    private val context: Context,
-    private val appListViewModel: AppListViewModel,
-    private var updateIsIntercepted: ((packageName: String, isIntercepted: Boolean) -> Unit),
-    private var getBitmapFromPackage: ((packageName: String) -> Bitmap?)
+    val context: Context,
+    val appListViewModel: AppListViewModel,
+    var updateIsIntercepted: ((packageName: String, isIntercepted: Boolean) -> Unit),
+    var getBitmapFromPackage: ((packageName: String) -> Bitmap?)
 ) : RecyclerView.Adapter<AppListAdapter.AppListViewHolder>() {
 
     private var appList: List<AppInfo> = emptyList()

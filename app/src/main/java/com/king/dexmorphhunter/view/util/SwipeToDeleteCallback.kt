@@ -1,7 +1,8 @@
-package com.king.dexmorphhunter.view.adapter
+package com.king.dexmorphhunter.view.util
 
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.king.dexmorphhunter.view.adapter.MethodListAdapter
 
 @Suppress("DEPRECATION")
 class SwipeToDeleteCallback(

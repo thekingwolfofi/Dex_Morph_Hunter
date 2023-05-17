@@ -12,10 +12,10 @@ import androidx.lifecycle.ViewModel
 import com.king.dexmorphhunter.model.data.AppInfo
 import com.king.dexmorphhunter.model.data.AppSettings
 import com.king.dexmorphhunter.model.data.ClassInfo
-import com.king.dexmorphhunter.model.db.AppDatabase
-import com.king.dexmorphhunter.model.db.AppInfoDao
-import com.king.dexmorphhunter.model.db.AppSettingsDao
+import com.king.dexmorphhunter.model.data.MethodInfo
+import com.king.dexmorphhunter.model.db.*
 import com.king.dexmorphhunter.model.util.Constants
+import com.king.dexmorphhunter.model.util.PackageFinderUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -23,57 +23,74 @@ import java.util.*
 import javax.inject.Inject
 
 @Suppress("DEPRECATION")
+@SuppressLint("StaticFieldLeak")
 @HiltViewModel
 class AppRepository @Inject constructor(
+    val context: Context,
     appDatabase: AppDatabase
 ) : ViewModel() {
 
     private var appSettingsDao: AppSettingsDao = appDatabase.appSettingsDao()
     private var appInfoDao: AppInfoDao = appDatabase.appInfoDao()
+    private var methodInfoDao: MethodInfoDao = appDatabase.methodInfoDao()
+    private var classInfoDao: ClassInfoDao = appDatabase.classInfoDao()
+    private var argumentInfoDao: ArgumentInfoDao = appDatabase.argumentInfoDao()
+
+    private var isFiltred: Boolean = true
 
     @SuppressLint("QueryPermissionsNeeded")
-    suspend fun loadInstalledAppList(context: Context): List<AppInfo> = withContext(Dispatchers.Main){
-        val mAppList: List<AppInfo>
-        setupConfig()
-        val reloadCache = appInfoDao.getAll().isEmpty()
-        if (reloadCache) {
-            val pm: PackageManager by lazy { context.packageManager}
-            val appList: MutableList<AppInfo> = mutableListOf()
-            withContext(Dispatchers.IO) {
-                val packages = pm.getInstalledPackages(0)
-                for (packageInfo in packages) {
-                    if (pm.getApplicationLabel(packageInfo.applicationInfo)
-                            .toString() in Constants.removePackage
-                    ) {
-                        continue
+    suspend fun loadInstalledAppList(context: Context): List<AppInfo> =
+        withContext(Dispatchers.Main) {
+            val mAppList: List<AppInfo>
+            setupConfig()
+            val reloadCache = appInfoDao.getAll().isEmpty()
+            if (reloadCache) {
+                val pm: PackageManager by lazy { context.packageManager }
+                val appList: MutableList<AppInfo> = mutableListOf()
+                withContext(Dispatchers.IO) {
+                    val packages = pm.getInstalledPackages(0)
+                    for (packageInfo in packages) {
+                        if (pm.getApplicationLabel(packageInfo.applicationInfo)
+                                .toString() in Constants.removePackage
+                        ) {
+                            continue
+                        }
+                        val appName = pm.getApplicationLabel(packageInfo.applicationInfo).toString()
+                        val isSystem = isSystemApp(context, packageInfo.packageName)
+                        val isIntercepted =
+                            appInfoDao.getByPackageName(packageInfo.packageName)?.isInterceptedApp
+                                ?: false
+                        appList.add(
+                            AppInfo(
+                                packageInfo.packageName,
+                                appName,
+                                isSystem,
+                                isIntercepted
+                            )
+                        )
+
                     }
-                    val appName = pm.getApplicationLabel(packageInfo.applicationInfo).toString()
-                    val isSystem = isSystemApp(context, packageInfo.packageName)
+                    // Salva a lista de apps no cache com Room
+                    insertAll(appList)
+
                     val isIntercepted =
-                        appInfoDao.getByPackageName(packageInfo.packageName)?.isInterceptedApp
-                            ?: false
-                    appList.add(AppInfo(packageInfo.packageName, appName, isSystem, isIntercepted))
-
+                        appSettingsDao.getAppSettings()?.interceptedAppsSwitch ?: false
+                    val isSystem = appSettingsDao.getAppSettings()?.systemAppsSwitch ?: false
+                    mAppList = filterApps("", isIntercepted, isSystem)
                 }
-                // Salva a lista de apps no cache com Room
-                insertAll(appList)
-
-                val isIntercepted = appSettingsDao.getAppSettings()?.interceptedAppsSwitch ?: false
-                val isSystem = appSettingsDao.getAppSettings()?.systemAppsSwitch ?: false
-                mAppList = filterApps("", isIntercepted, isSystem)
+                return@withContext mAppList
+            } else {
+                withContext(Dispatchers.IO) {
+                    val isIntercepted =
+                        appSettingsDao.getAppSettings()?.interceptedAppsSwitch ?: false
+                    val isSystem = appSettingsDao.getAppSettings()?.systemAppsSwitch ?: false
+                    mAppList = filterApps("", isIntercepted, isSystem)
+                }
+                return@withContext mAppList
             }
-            return@withContext mAppList
-        } else {
-            withContext(Dispatchers.IO) {
-                val isIntercepted = appSettingsDao.getAppSettings()?.interceptedAppsSwitch ?: false
-                val isSystem = appSettingsDao.getAppSettings()?.systemAppsSwitch ?: false
-                mAppList = filterApps("", isIntercepted, isSystem)
-            }
-            return@withContext mAppList
         }
-    }
 
-    private suspend fun setupConfig(){
+    private suspend fun setupConfig() {
         val settingsIsNull = getSettings()
         if (settingsIsNull) {
             withContext(Dispatchers.IO) {
@@ -93,15 +110,75 @@ class AppRepository @Inject constructor(
         appInfoDao.updateIsIntercepted(packageName, isIntercepted)
     }
 
-    suspend fun updateClass(packageName: String, classList: List<ClassInfo>){
-        // Atualiza o valor de `classIntercepted` no banco de dados
-        appInfoDao.updateClasses(packageName, classList)
+    private suspend fun updateClasses(classList: List<ClassInfo>) {
+        // Insere cada classe na lista
+        classInfoDao.insertAll(classList)
+
+    }
+
+    private suspend fun updateMethods(MethodList: List<MethodInfo>) {
+        // Insere cada classe na lista
+        methodInfoDao.insertAll(MethodList)
+
+    }
+
+    suspend fun filterClassList(packageName: String): List<ClassInfo> {
+        val classCacheIsEmpty = classInfoDao.getByPackageName(packageName)?.isEmpty()
+        if (classCacheIsEmpty == true) {
+            val classList = PackageFinderUtils.getListClassesInPackage(context, packageName)
+            val classInfoList = mutableListOf<ClassInfo>()
+
+            for (clazz in classList) {
+                if (isFiltred && clazz.contains("$")) {
+                    continue
+                }
+                val classInfo = ClassInfo(clazz, packageName)
+                classInfoList.add(classInfo)
+            }
+            withContext(Dispatchers.IO) {
+                updateClasses(classInfoList)
+            }
+            return classInfoList
+        } else {
+            return classInfoDao.getByPackageName(packageName)!!
+        }
+
+    }
+
+    suspend fun getMethodList(classInfo: ClassInfo): List<MethodInfo> {
+        val methodCacheIsEmpty = methodInfoDao.getByClassName(classInfo.className)?.isEmpty()
+        if (methodCacheIsEmpty == true) {
+            val methodList = PackageFinderUtils.getAllMethods(classInfo.className)
+            val methodInfoList = mutableListOf<MethodInfo>()
+            return if (methodList.isEmpty()) {
+                listOf(MethodInfo("Xposed não encontrado", classInfo.packageName, classInfo.className))
+
+            } else {
+                for (method in methodList) {
+                    val methodInfo = MethodInfo(method.name, classInfo.packageName, classInfo.className, method.returnType, method.defaultValue)
+                    methodInfoList.add(methodInfo)
+                }
+                updateMethods(methodInfoList)
+                methodInfoList
+            }
+        } else {
+            return methodInfoDao.getByClassName(classInfo.className)!!
+        }
+    }
+
+
+
+    fun setFilterClass() {
+        isFiltred = !isFiltred
     }
 
     suspend fun invalidateCache(context: Context) {
         // Exclui todas as entradas do banco de dados
         appInfoDao.deleteAll()
         appSettingsDao.deleteAll()
+        classInfoDao.deleteAll()
+        methodInfoDao.deleteAll()
+        argumentInfoDao.deleteAll()
 
         // Carrega a lista de aplicativos instalados
         loadInstalledAppList(context)
@@ -110,9 +187,14 @@ class AppRepository @Inject constructor(
     fun getBitmapFromPackage(context: Context, packageName: String): Bitmap? {
         return try {
             val packageManager = context.packageManager
-            val appInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
+            val appInfo =
+                packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
             val appIcon = appInfo.loadIcon(packageManager)
-            val appBitmap = Bitmap.createBitmap(appIcon.intrinsicWidth, appIcon.intrinsicHeight, Bitmap.Config.ARGB_8888)
+            val appBitmap = Bitmap.createBitmap(
+                appIcon.intrinsicWidth,
+                appIcon.intrinsicHeight,
+                Bitmap.Config.ARGB_8888
+            )
             val canvas = Canvas(appBitmap)
             appIcon.setBounds(0, 0, canvas.width, canvas.height)
             appIcon.draw(canvas)
@@ -122,7 +204,6 @@ class AppRepository @Inject constructor(
         }
     }
 
-
     private fun isSystemApp(context: Context, packageName: String): Boolean {
         val pm = context.packageManager
         val applicationInfo = pm.getApplicationInfo(packageName, 0)
@@ -130,7 +211,7 @@ class AppRepository @Inject constructor(
     }
 
     suspend fun filterApps(
-        query: String? = "" ,
+        query: String? = "",
         isIntercepted: Boolean = false,
         isSystem: Boolean = false
     ): List<AppInfo> {
@@ -139,60 +220,11 @@ class AppRepository @Inject constructor(
         }
     }
 
-    /*
-    private fun encodeBitmap(bitmap: Bitmap?): String? {
-        if (bitmap == null) {
-            return null
-        }
-        val stream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-        val byteArray = stream.toByteArray()
-        return Base64.encodeToString(byteArray, Base64.DEFAULT)
-    }
-
-    private fun decodeBitmap(bitmapString: String?): Bitmap? {
-        if (bitmapString == null) {
-            return null
-        }
-        val byteArray = Base64.decode(bitmapString, Base64.DEFAULT)
-        return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
-    }
-
-
-
-    fun updateListApps(
-        filterSystemApps: Boolean,
-        filterInterceptedApps: Boolean
-    ) : List<AppInfo>{
-
-        appSettingsDao.insertOrUpdateAppSettings(AppSettings(
-            1,
-            filterInterceptedApps,
-            filterSystemApps
-        ))
-        return emptyList()
-    }
-     */
-
     private suspend fun insertAll(appInfoList: List<AppInfo>) {
         withContext(Dispatchers.IO) {
             appInfoDao.insertAll(appInfoList)
         }
     }
-
-    /*
-    suspend fun getAll(): List<AppInfo> {
-        return withContext(Dispatchers.IO) {
-            appInfoDao.getAll()
-        }
-    }
-
-    suspend fun getByPackageName(packageName: String): AppInfo? {
-        return withContext(Dispatchers.IO) {
-            appInfoDao.getByPackageName(packageName)
-        }
-    }
-     */
 
     private suspend fun getSettings(): Boolean {
         return withContext(Dispatchers.IO) {

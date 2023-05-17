@@ -4,8 +4,10 @@ package com.king.dexmorphhunter.model.util
 import android.content.Context
 import android.content.pm.PackageManager
 import dalvik.system.DexFile
+import de.robv.android.xposed.XposedHelpers
+import java.lang.reflect.Method
 
-object ClassesPackageUtils {
+object PackageFinderUtils {
 
     fun getListClassesInPackage(context: Context, packageName: String): List<String> {
         // Lista de classes que serão retornadas pela função
@@ -48,6 +50,26 @@ object ClassesPackageUtils {
 
         // Retorna a lista de classes encontradas
         return classes
+    }
+
+    // Este método retorna uma lista de nomes de método para uma determinada classe
+    private fun getMethodList(clazz: Class<*>): List<Method> {
+        val methodNames = mutableListOf<Method>()
+        for (method in clazz.declaredMethods) {
+            methodNames.add(method)
+        }
+        return methodNames
+    }
+
+    // Este método público pode ser chamado de outras partes do código para obter a lista de nomes de método
+    fun getAllMethods(className: String): List<Method> {
+        return try {
+            val clazz = XposedHelpers.findClass(className, null)
+            getMethodList(clazz)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList<Method>()
+        }
     }
 
 }

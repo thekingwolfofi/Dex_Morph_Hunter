@@ -28,8 +28,9 @@ class MethodExtractorXposedModule: IXposedHookLoadPackage {
             getMethodNames(clazz)
         } catch (e: Exception) {
             e.printStackTrace()
-            emptyList()
+            listOf("Xposed não encontrado")
         }
     }
+
 }
 

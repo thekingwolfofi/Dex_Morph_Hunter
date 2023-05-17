@@ -3,7 +3,6 @@ package com.king.dexmorphhunter.view
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.ProgressBar
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,7 +23,6 @@ class MainActivity : AppCompatActivity() {
     @Inject lateinit var adapter: AppListAdapter
     @Inject lateinit var appRepository: AppRepository
     private lateinit var binding: ActivityMainBinding
-    private lateinit var progressBar: ProgressBar
 
     private var appList: List<AppInfo> = emptyList()
 
@@ -113,8 +111,6 @@ class MainActivity : AppCompatActivity() {
                 binding.swipeRefreshLayout.isRefreshing = false
             }
         }
-
-        progressBar = binding.progressBar
 
         binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener,
             android.widget.SearchView.OnQueryTextListener {

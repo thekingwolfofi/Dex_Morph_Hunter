@@ -9,10 +9,14 @@ data class ArgumentInfo(
     @PrimaryKey
     @ColumnInfo(name = "argument_name")
     val argumentName: String,
-    @ColumnInfo(name = "argument_type")
-    val argumentType: String,
-    @ColumnInfo(name = "argument_value")
-    val argumentValue: String? = null,
+    @ColumnInfo(name = "method_name")
+    val methodName: String,
     @ColumnInfo(name = "package_name")
-    val packageName: String
+    val packageName: String,
+    @ColumnInfo(name = "argument_type")
+    val argumentType: Class<*>,
+    @ColumnInfo(name = "argument_value")
+    val argumentValue: Any? = null,
+    @ColumnInfo(name = "new_argument_value")
+    val newArgumentValue: Any? = null
 )

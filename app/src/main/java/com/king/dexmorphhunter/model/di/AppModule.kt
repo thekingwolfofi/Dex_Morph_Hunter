@@ -10,7 +10,7 @@ import com.king.dexmorphhunter.model.db.AppDatabase
 import com.king.dexmorphhunter.model.db.AppInfoDao
 import com.king.dexmorphhunter.model.db.AppSettingsDao
 import com.king.dexmorphhunter.model.repository.AppRepository
-import com.king.dexmorphhunter.model.util.ClassesPackageUtils
+import com.king.dexmorphhunter.model.util.PackageFinderUtils
 import com.king.dexmorphhunter.xposed.MethodExtractorXposedModule
 import com.king.dexmorphhunter.view.adapter.AppListAdapter
 import com.king.dexmorphhunter.view.adapter.ArgumentsListAdapter
@@ -67,9 +67,9 @@ object AppModule {
 
 
     @Provides
-    fun provideAppRepository(appDatabase: AppDatabase): AppRepository {
+    fun provideAppRepository(context: Context, appDatabase: AppDatabase): AppRepository {
 
-        return AppRepository(appDatabase)
+        return AppRepository(context ,appDatabase)
     }
 
     /*
@@ -100,9 +100,10 @@ object AppModule {
 
     @Provides
     fun provideMethodListAdapter(
-            context: Context
+            context: Context,
+            methodSelectViewModel: MethodSelectViewModel
         ): MethodListAdapter {
-            return MethodListAdapter(context)
+            return MethodListAdapter()
         }
 
     @Provides
@@ -118,19 +119,20 @@ object AppModule {
     }
 
     @Provides
-    fun provideClassesPackageUtils(): ClassesPackageUtils {
-        return ClassesPackageUtils
+    fun provideClassesPackageUtils(): PackageFinderUtils {
+        return PackageFinderUtils
     }
 
     @Provides
     fun provideMethodSelectViewModel(
-        context: Context
+        context: Context,
+        appRepository: AppRepository
     ): MethodSelectViewModel {
-        return MethodSelectViewModel(context)
+        return MethodSelectViewModel(context, appRepository)
     }
     @Provides
-    fun provideMethodSelectViewModelFactory(context: Context): MethodSelectViewModelFactory {
-        return MethodSelectViewModelFactory(context)
+    fun provideMethodSelectViewModelFactory(context: Context, appRepository: AppRepository): MethodSelectViewModelFactory {
+        return MethodSelectViewModelFactory(context, appRepository)
     }
 }
 

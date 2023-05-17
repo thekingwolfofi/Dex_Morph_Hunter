@@ -8,7 +8,7 @@
         android:orientation="horizontal">
 
         <EditText
-            android:id="@+id/parameter_name"
+            android:id="@+id/argument_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -17,7 +17,7 @@
 
 
         <EditText
-            android:id="@+id/parameter_text_value"
+            android:id="@+id/argument_text_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -25,7 +25,7 @@
             android:autofillHints="" />
 
         <EditText
-            android:id="@+id/parameter_text_new_value"
+            android:id="@+id/argument_text_new_value"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -33,7 +33,7 @@
             android:autofillHints="" />
 
         <EditText
-            android:id="@+id/parameter_numeric_value"
+            android:id="@+id/argument_numeric_value"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -43,7 +43,7 @@
             tools:ignore="LabelFor" />
 
         <EditText
-            android:id="@+id/parameter_numeric_new_value"
+            android:id="@+id/argument_numeric_new_value"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -53,7 +53,7 @@
             tools:ignore="LabelFor" />
 
         <Switch
-            android:id="@+id/parameter_value_boolean"
+            android:id="@+id/argument_value_boolean"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -61,7 +61,7 @@
             tools:ignore="UseSwitchCompatOrMaterialXml" />
 
         <Switch
-            android:id="@+id/parameter_new_value_boolean"
+            android:id="@+id/argument_new_value_boolean"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -69,7 +69,7 @@
             tools:ignore="UseSwitchCompatOrMaterialXml" />
 
         <Button
-            android:id="@+id/parameter_value_list_button"
+            android:id="@+id/argument_value_list_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Mais informações"

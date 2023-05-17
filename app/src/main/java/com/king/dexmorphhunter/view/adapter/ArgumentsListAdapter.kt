@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.king.dexmorphhunter.databinding.ItemParameterListBinding
 import com.king.dexmorphhunter.model.data.ArgumentInfo
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 class ArgumentsListAdapter @Inject constructor(
@@ -27,53 +28,53 @@ class ArgumentsListAdapter @Inject constructor(
 
     class ViewHolder(private val binding: ItemParameterListBinding) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(parameter: ArgumentInfo) {
-            binding.parameterName.hint = parameter.name
-            binding.parameterValueListButton.visibility = View.GONE
-            binding.parameterTextValue.visibility = View.GONE
-            binding.parameterTextNewValue.visibility = View.GONE
-            binding.parameterNumericValue.visibility = View.GONE
-            binding.parameterNumericNewValue.visibility = View.GONE
-            binding.parameterValueBoolean.visibility = View.GONE
-            binding.parameterNewValueBoolean.visibility = View.GONE
+        fun bind(argumentInfo: ArgumentInfo) {
+            binding.argumentName.hint = argumentInfo.argumentName
+            binding.argumentValueListButton.visibility = View.GONE
+            binding.argumentTextValue.visibility = View.GONE
+            binding.argumentTextNewValue.visibility = View.GONE
+            binding.argumentNumericValue.visibility = View.GONE
+            binding.argumentNumericNewValue.visibility = View.GONE
+            binding.argumentValueBoolean.visibility = View.GONE
+            binding.argumentNewValueBoolean.visibility = View.GONE
 
-            when (parameter.type) {
+            when (argumentInfo.argumentType) {
                 String::class.java -> {
-                    val value = parameter.value as? String
-                    binding.parameterTextValue.setText(value)
-                    binding.parameterTextValue.visibility = View.VISIBLE
-                    binding.parameterTextNewValue.visibility = View.VISIBLE
-                    binding.parameterTextNewValue.setText(value)
+                    val value = argumentInfo.argumentValue as? String
+                    binding.argumentTextValue.setText(value)
+                    binding.argumentTextValue.visibility = View.VISIBLE
+                    binding.argumentTextNewValue.visibility = View.VISIBLE
+                    binding.argumentTextNewValue.setText(value)
                 }
                 Int::class.java, Long::class.java, Float::class.java, Double::class.java -> {
-                    val value = parameter.value?.toString()
-                    binding.parameterNumericValue.setText(value)
-                    binding.parameterNumericValue.visibility = View.VISIBLE
-                    binding.parameterNumericNewValue.visibility = View.VISIBLE
-                    binding.parameterNumericNewValue.setText(value)
+                    val value = argumentInfo.argumentValue?.toString()
+                    binding.argumentNumericValue.setText(value)
+                    binding.argumentNumericValue.visibility = View.VISIBLE
+                    binding.argumentNumericNewValue.visibility = View.VISIBLE
+                    binding.argumentNumericNewValue.setText(value)
                 }
                 Boolean::class.java -> {
-                    val value = parameter.value as? Boolean
-                    binding.parameterValueBoolean.isChecked = value ?: false
-                    binding.parameterValueBoolean.visibility = View.VISIBLE
-                    binding.parameterNewValueBoolean.visibility = View.VISIBLE
-                    binding.parameterNewValueBoolean.isChecked = value ?: false
+                    val argumentValue = argumentInfo.argumentValue as? Boolean
+                    binding.argumentValueBoolean.isChecked = argumentValue ?: false
+                    binding.argumentValueBoolean.visibility = View.VISIBLE
+                    binding.argumentNewValueBoolean.visibility = View.VISIBLE
+                    binding.argumentNewValueBoolean.isChecked = argumentValue ?: false
                 }
                 List::class.java -> {
-                    binding.parameterValueListButton.visibility = View.VISIBLE
-                    binding.parameterValueListButton.setOnClickListener {
+                    binding.argumentValueListButton.visibility = View.VISIBLE
+                    binding.argumentValueListButton.setOnClickListener {
                         // Lógica para lidar com o tipo List aqui
                     }
                 }
                 Array::class.java -> {
-                    binding.parameterValueListButton.visibility = View.VISIBLE
-                    binding.parameterValueListButton.setOnClickListener {
+                    binding.argumentValueListButton.visibility = View.VISIBLE
+                    binding.argumentValueListButton.setOnClickListener {
                         // Lógica para lidar com o tipo Array aqui
                     }
                 }
                 else -> {
-                binding.parameterValueListButton.visibility = View.VISIBLE
-                binding.parameterValueListButton.setOnClickListener {
+                binding.argumentValueListButton.visibility = View.VISIBLE
+                binding.argumentValueListButton.setOnClickListener {
                     // Lógica para lidar com o tipo de objeto customizado aqui
                 }
             }

@@ -7,7 +7,6 @@ import com.king.dexmorphhunter.databinding.ActivityParameterEditorBinding
 import com.king.dexmorphhunter.model.Test
 import com.king.dexmorphhunter.model.data.ArgumentInfo
 import com.king.dexmorphhunter.view.adapter.ArgumentsListAdapter
-import dagger.hilt.android.AndroidEntryPoint
 
 class ParameterEditorActivity : AppCompatActivity() {
     private lateinit var binding: ActivityParameterEditorBinding
@@ -20,7 +19,7 @@ class ParameterEditorActivity : AppCompatActivity() {
         //val context = applicationContext
 
         // Inicializa as variaveis passadas por instancia
-        val arguments = getArgumentsInfo("testAllTypes", Test::class.java)
+        val arguments = getArgumentsInfo("testAllTypes", Test::class.java, packageName)
 
         // Inicializa a view binding
         binding = ActivityParameterEditorBinding.inflate(layoutInflater)
@@ -32,7 +31,7 @@ class ParameterEditorActivity : AppCompatActivity() {
 
     }
 
-    private fun getArgumentsInfo(methodName: String, targetClass: Class<*>): List<ArgumentInfo>? {
+    private fun getArgumentsInfo(methodName: String, targetClass: Class<*>,packageName: String): List<ArgumentInfo>? {
         val method = targetClass.methods.firstOrNull { it.name == methodName }
         if (method != null) {
             val parameters = method.parameters
@@ -43,8 +42,8 @@ class ParameterEditorActivity : AppCompatActivity() {
                     paramType.name.startsWith("java.") -> paramType.simpleName
                     else -> paramType.name.substringAfterLast('.')
                 }
-                val paramName = "arg$typeName"
-                ArgumentInfo(paramName, paramType)
+                val argumentName = "arg$typeName"
+                ArgumentInfo(argumentName, method.name, packageName, paramType, packageName)
             }
         }
         return null

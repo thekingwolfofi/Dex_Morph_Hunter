@@ -8,7 +8,7 @@ import com.king.dexmorphhunter.model.data.AppInfo
 import com.king.dexmorphhunter.model.data.AppSettings
 import com.king.dexmorphhunter.model.db.AppDatabase
 import com.king.dexmorphhunter.model.repository.AppRepository
-import com.king.dexmorphhunter.model.util.ClassesPackageUtils
+import com.king.dexmorphhunter.model.util.PackageFinderUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -72,30 +72,27 @@ class AppListViewModel(
             val interceptedApps = filterInterceptedApps.value ?: false
             val systemApps = filterSystemApps.value ?: false
 
-            val appDatabase = AppDatabase.getDatabase(context)
-            if (appDatabase != null) {
-                val settings = withContext(Dispatchers.IO) {
-                    val appSettingsDao = AppDatabase.getDatabase(context).appSettingsDao()
-                    appSettingsDao.getAppSettings()
-                }
-
-                if (settings != null) {
-                    if (settings.systemAppsSwitch != systemApps || settings.interceptedAppsSwitch != interceptedApps) {
-                        val appSettings = AppSettings(1, interceptedApps, systemApps)
-                        appRepository.updateSettings(appSettings)
-                    }
-                }
-
-                val appList = withContext(Dispatchers.IO) {
-                    appRepository.filterApps(query, interceptedApps, systemApps)
-                }
-                _appList.postValue(appList)
+            val settings = withContext(Dispatchers.IO) {
+                val appSettingsDao = AppDatabase.getDatabase(context).appSettingsDao()
+                appSettingsDao.getAppSettings()
             }
+
+            if (settings != null) {
+                if (settings.systemAppsSwitch != systemApps || settings.interceptedAppsSwitch != interceptedApps) {
+                    val appSettings = AppSettings(1, interceptedApps, systemApps)
+                    appRepository.updateSettings(appSettings)
+                }
+            }
+
+            val appList = withContext(Dispatchers.IO) {
+                appRepository.filterApps(query, interceptedApps, systemApps)
+            }
+            _appList.postValue(appList)
         }
     }
 
     fun getExtractedClassesFromApp(context: Context, packageName: String): List<String> {
-        return ClassesPackageUtils.getListClassesInPackage(context, packageName)
+        return PackageFinderUtils.getListClassesInPackage(context, packageName)
     }
 
 }
