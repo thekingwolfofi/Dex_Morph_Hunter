@@ -21,28 +21,23 @@ class MethodSelectViewModel( var context: Context, var appRepository: AppReposit
     val methodList: LiveData<List<MethodInfo>>
         get() = _methodList
 
-    private var isFiltred: Boolean = true
-
+    //private var isFiltred: Boolean = true
 
     suspend fun getMethodList(classInfo: ClassInfo) {
         val methodList = appRepository.getMethodList(classInfo)
         _methodList.postValue(methodList)
     }
 
-
     suspend fun getClassList(packageName: String) {
         val classList = appRepository.filterClassList(packageName)
         _classList.postValue(classList)
     }
-
-
 
     suspend fun setFilterClass(packageName: String) {
         appRepository.setFilterClass()
         getClassList(packageName)
 
     }
-
 
 }
 

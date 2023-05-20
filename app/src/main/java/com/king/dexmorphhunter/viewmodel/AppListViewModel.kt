@@ -32,6 +32,7 @@ class AppListViewModel(
 
     private val _appList = MutableLiveData<List<AppInfo>>()
     val appList: LiveData<List<AppInfo>> = _appList
+    
 
     suspend fun getInstalledAppList() {
         _appList.postValue(appRepository.loadInstalledAppList(context))

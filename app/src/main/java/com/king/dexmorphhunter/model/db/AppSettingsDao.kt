@@ -26,5 +26,4 @@ interface AppSettingsDao {
     @Query("UPDATE app_settings SET system_Apps_Switch = :isSystemApp WHERE id = 1")
     fun updateSystemAppsSwitch(isSystemApp: Boolean)
 
-
 }

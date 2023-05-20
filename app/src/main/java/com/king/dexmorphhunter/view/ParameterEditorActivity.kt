@@ -15,8 +15,6 @@ class ParameterEditorActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Inicializa o contexto
-        //val context = applicationContext
 
         // Inicializa as variaveis passadas por instancia
         val arguments = getArgumentsInfo("testAllTypes", Test::class.java, packageName)

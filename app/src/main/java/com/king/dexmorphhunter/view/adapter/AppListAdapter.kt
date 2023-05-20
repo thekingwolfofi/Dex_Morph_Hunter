@@ -54,8 +54,10 @@ class AppListAdapter @Inject constructor(
             itemBinding.appIcon.setImageBitmap(getBitmapFromPackage(appInfo.packageName))
             itemBinding.appInterceptionSwitch.isChecked = appInfo.isInterceptedApp ?: false
 
-            itemBinding.appInterceptionSwitch.setOnCheckedChangeListener { _, _  ->
+            itemBinding.appInterceptionSwitch.setOnCheckedChangeListener { _, check  ->
+                itemBinding.appInterceptionSwitch.isChecked = check
                 updateInterceptSwitch(appInfo)
+
             }
 
             itemBinding.itemList.setOnClickListener {
@@ -69,13 +71,13 @@ class AppListAdapter @Inject constructor(
             classList = appListViewModel.getExtractedClassesFromApp(context, appInfo.packageName)
             if(classList.isNotEmpty()) {
                 val intent = Intent(context, MethodSelectActivity::class.java)
-                itemBinding.appInterceptionSwitch.isChecked = true
                 val isRemovedApp = removePackage.any { it in appInfo.appName || it in appInfo.packageName }
                 if (isRemovedApp) {
                     itemBinding.appPackage.text = "Block App"
                     itemBinding.appInterceptionSwitch.isChecked = false
                     itemBinding.appInterceptionSwitch.isEnabled = false
                 } else {
+
                     intent.putExtra("packageName", appInfo.packageName)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     context.startActivity(intent)
@@ -83,6 +85,7 @@ class AppListAdapter @Inject constructor(
                         appInfo.packageName,
                         itemBinding.appInterceptionSwitch.isChecked
                     )
+
                 }
             } else {
                 itemBinding.appPackage.text = "Empty Classes"
@@ -90,6 +93,7 @@ class AppListAdapter @Inject constructor(
                 itemBinding.appInterceptionSwitch.isEnabled = false
 
             }
+
         }
     }
 

@@ -3,12 +3,16 @@ package com.king.dexmorphhunter.model.util
 
 import android.content.Context
 import android.content.pm.PackageManager
+import com.king.dexmorphhunter.model.data.ArgumentInfo
 import dalvik.system.DexFile
+import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import java.lang.reflect.Method
 
 object PackageFinderUtils {
 
+    // Este método retorna uma lista de nomes de classe para o packagename determinado
     fun getListClassesInPackage(context: Context, packageName: String): List<String> {
         // Lista de classes que serão retornadas pela função
         val classes = mutableListOf<String>()
@@ -54,11 +58,11 @@ object PackageFinderUtils {
 
     // Este método retorna uma lista de nomes de método para uma determinada classe
     private fun getMethodList(clazz: Class<*>): List<Method> {
-        val methodNames = mutableListOf<Method>()
+        val methodInstances = mutableListOf<Method>()
         for (method in clazz.declaredMethods) {
-            methodNames.add(method)
+            methodInstances.add(method)
         }
-        return methodNames
+        return methodInstances
     }
 
     // Este método público pode ser chamado de outras partes do código para obter a lista de nomes de método
@@ -68,8 +72,34 @@ object PackageFinderUtils {
             getMethodList(clazz)
         } catch (e: Exception) {
             e.printStackTrace()
-            emptyList<Method>()
+            emptyList()
         }
     }
+
+    private fun getArgumentsInfo(methodName: String, targetClass: Class<*>, packageName: String): List<ArgumentInfo>? {
+        val method = targetClass.methods.firstOrNull { it.name == methodName }
+        if (method != null) {
+            XposedBridge.hookMethod(method, object : XC_MethodHook() {
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    val args = param.args // Array de argumentos do método
+                    val argumentInfoList = mutableListOf<ArgumentInfo>()
+
+                    for (i in args.indices) {
+                        val argumentName = "arg$i"
+                        val argumentType = args[i]?.javaClass ?: Any::class.java
+                        val argumentValue = args[i]?.toString() ?: "null"
+
+                        val argumentInfo = ArgumentInfo(argumentName, method.name, packageName, argumentType, argumentValue)
+                        argumentInfoList.add(argumentInfo)
+                    }
+
+                    // Use a lista de ArgumentInfo aqui, se necessário
+                }
+            })
+        }
+
+        return null
+    }
+
 
 }

@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package com.king.dexmorphhunter.model.repository
 
 import android.annotation.SuppressLint
@@ -9,10 +7,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import androidx.lifecycle.ViewModel
-import com.king.dexmorphhunter.model.data.AppInfo
-import com.king.dexmorphhunter.model.data.AppSettings
-import com.king.dexmorphhunter.model.data.ClassInfo
-import com.king.dexmorphhunter.model.data.MethodInfo
+import com.king.dexmorphhunter.model.data.*
 import com.king.dexmorphhunter.model.db.*
 import com.king.dexmorphhunter.model.util.Constants
 import com.king.dexmorphhunter.model.util.PackageFinderUtils
@@ -22,7 +17,7 @@ import kotlinx.coroutines.withContext
 import java.util.*
 import javax.inject.Inject
 
-@Suppress("DEPRECATION")
+@Suppress("NAME_SHADOWING", "DEPRECATION")
 @SuppressLint("StaticFieldLeak")
 @HiltViewModel
 class AppRepository @Inject constructor(
@@ -48,7 +43,7 @@ class AppRepository @Inject constructor(
                 val pm: PackageManager by lazy { context.packageManager }
                 val appList: MutableList<AppInfo> = mutableListOf()
                 withContext(Dispatchers.IO) {
-                    val packages = pm.getInstalledPackages(0)
+                    val packages = pm.getInstalledPackages(PackageManager.GET_META_DATA)
                     for (packageInfo in packages) {
                         if (pm.getApplicationLabel(packageInfo.applicationInfo)
                                 .toString() in Constants.removePackage
@@ -108,6 +103,8 @@ class AppRepository @Inject constructor(
     suspend fun updateIsIntercepted(packageName: String, isIntercepted: Boolean) {
         // Atualiza o valor de `isInterceptedApp` no banco de dados
         appInfoDao.updateIsIntercepted(packageName, isIntercepted)
+
+
     }
 
     private suspend fun updateClasses(classList: List<ClassInfo>) {
@@ -122,50 +119,36 @@ class AppRepository @Inject constructor(
 
     }
 
-    suspend fun filterClassList(packageName: String): List<ClassInfo> {
-        val classCacheIsEmpty = classInfoDao.getByPackageName(packageName)?.isEmpty()
-        if (classCacheIsEmpty == true) {
+    suspend fun filterClassList(packageName: String): List<ClassInfo> = withContext(Dispatchers.IO) {
+        val classList = classInfoDao.getByPackageName(packageName)
+        if (classList.isNullOrEmpty()) {
             val classList = PackageFinderUtils.getListClassesInPackage(context, packageName)
-            val classInfoList = mutableListOf<ClassInfo>()
-
-            for (clazz in classList) {
-                if (isFiltred && clazz.contains("$")) {
-                    continue
-                }
-                val classInfo = ClassInfo(clazz, packageName)
-                classInfoList.add(classInfo)
-            }
-            withContext(Dispatchers.IO) {
-                updateClasses(classInfoList)
-            }
-            return classInfoList
+                .filter { clazz -> !isFiltred || !clazz.contains("$") }
+                .map { clazz -> ClassInfo(clazz, packageName) }
+            updateClasses(classList)
+            classList
         } else {
-            return classInfoDao.getByPackageName(packageName)!!
+            classList
         }
-
     }
 
-    suspend fun getMethodList(classInfo: ClassInfo): List<MethodInfo> {
-        val methodCacheIsEmpty = methodInfoDao.getByClassName(classInfo.className)?.isEmpty()
-        if (methodCacheIsEmpty == true) {
+    suspend fun getMethodList(classInfo: ClassInfo): List<MethodInfo> = withContext(Dispatchers.IO) {
+        val methodList = methodInfoDao.getByClassName(classInfo.className)
+        return@withContext if (methodList.isNullOrEmpty()) {
             val methodList = PackageFinderUtils.getAllMethods(classInfo.className)
-            val methodInfoList = mutableListOf<MethodInfo>()
-            return if (methodList.isEmpty()) {
+            if (methodList.isEmpty()) {
                 listOf(MethodInfo("Xposed não encontrado", classInfo.packageName, classInfo.className))
-
             } else {
-                for (method in methodList) {
-                    val methodInfo = MethodInfo(method.name, classInfo.packageName, classInfo.className, method.returnType, method.defaultValue)
-                    methodInfoList.add(methodInfo)
+                val methodInfoList = methodList.map { method ->
+                    MethodInfo(method.name, classInfo.packageName, classInfo.className, method.returnType)
                 }
                 updateMethods(methodInfoList)
                 methodInfoList
             }
         } else {
-            return methodInfoDao.getByClassName(classInfo.className)!!
+            methodList
         }
     }
-
 
 
     fun setFilterClass() {
@@ -187,9 +170,7 @@ class AppRepository @Inject constructor(
     fun getBitmapFromPackage(context: Context, packageName: String): Bitmap? {
         return try {
             val packageManager = context.packageManager
-            val appInfo =
-                packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
-            val appIcon = appInfo.loadIcon(packageManager)
+            val appIcon = packageManager.getApplicationIcon(packageName) // Obter o AppIcon diretamente
             val appBitmap = Bitmap.createBitmap(
                 appIcon.intrinsicWidth,
                 appIcon.intrinsicHeight,
@@ -199,6 +180,8 @@ class AppRepository @Inject constructor(
             appIcon.setBounds(0, 0, canvas.width, canvas.height)
             appIcon.draw(canvas)
             appBitmap
+        } catch (e: PackageManager.NameNotFoundException) {
+            null
         } catch (e: Exception) {
             null
         }
@@ -220,10 +203,8 @@ class AppRepository @Inject constructor(
         }
     }
 
-    private suspend fun insertAll(appInfoList: List<AppInfo>) {
-        withContext(Dispatchers.IO) {
+    private suspend fun insertAll(appInfoList: List<AppInfo>) = withContext(Dispatchers.IO) {
             appInfoDao.insertAll(appInfoList)
-        }
     }
 
     private suspend fun getSettings(): Boolean {
@@ -233,10 +214,10 @@ class AppRepository @Inject constructor(
         }
     }
 
-    suspend fun updateSettings(appSettings: AppSettings) {
-        withContext(Dispatchers.IO) {
+    suspend fun updateSettings(appSettings: AppSettings) = withContext(Dispatchers.IO) {
             appSettingsDao.insertOrUpdateAppSettings(appSettings)
-        }
     }
+
+
 
 }

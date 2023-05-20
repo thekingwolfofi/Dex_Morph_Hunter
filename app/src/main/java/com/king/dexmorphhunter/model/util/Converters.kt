@@ -3,11 +3,7 @@ package com.king.dexmorphhunter.model.util
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.king.dexmorphhunter.model.data.AppInfo
-import com.king.dexmorphhunter.model.data.ArgumentInfo
-import com.king.dexmorphhunter.model.data.ClassInfo
-import com.king.dexmorphhunter.model.data.MethodInfo
-import org.json.JSONArray
+import com.king.dexmorphhunter.model.data.*
 import org.json.JSONObject
 
 class Converters {
@@ -40,21 +36,29 @@ class Converters {
 
     @TypeConverter
     fun toAppInfo(value: String?): AppInfo? {
-        val jsonObject = JSONObject(value)
-        val packageName = jsonObject.getString("packageName")
-        val appName = jsonObject.getString("appName")
-        val isSystemApp = if (jsonObject.isNull("isSystemApp")) null else jsonObject.getBoolean("isSystemApp")
-        val isInterceptedApp = if (jsonObject.isNull("isInterceptedApp")) null else jsonObject.getBoolean("isInterceptedApp")
-        val classInterceptedJson = jsonObject.getJSONArray("classIntercepted").toString()
+        val jsonObject = value?.let { JSONObject(it) }
+        if (jsonObject != null) {
+            val packageName = jsonObject.getString("packageName")
+            val appName = jsonObject.getString("appName")
+            val isSystemApp =
+                if (jsonObject.isNull("isSystemApp")) null else jsonObject.getBoolean("isSystemApp")
+            val isInterceptedApp =
+                if (jsonObject.isNull("isInterceptedApp")) null else jsonObject.getBoolean("isInterceptedApp")
+            val classInterceptedJson = jsonObject.getJSONArray("classIntercepted").toString()
 
-        val classInterceptedList = gson.fromJson<List<ClassInfo>>(classInterceptedJson, object : TypeToken<List<ClassInfo>>() {}.type)
+            val classInterceptedList = gson.fromJson<List<ClassInfo>>(
+                classInterceptedJson,
+                object : TypeToken<List<ClassInfo>>() {}.type
+            )
 
-        return AppInfo(
-            packageName = packageName,
-            appName = appName,
-            isSystemApp = isSystemApp,
-            isInterceptedApp = isInterceptedApp
-        )
+            return AppInfo(
+                packageName = packageName,
+                appName = appName,
+                isSystemApp = isSystemApp,
+                isInterceptedApp = isInterceptedApp
+            )
+        }
+        return null
     }
 
     @TypeConverter
@@ -89,17 +93,17 @@ class Converters {
 
     @TypeConverter
     fun fromAny(any: Any?): String? {
-        return Gson().toJson(any)
+        return gson.toJson(any)
     }
 
     @TypeConverter
     fun toAny(json: String?): Any? {
-        return Gson().fromJson(json, Any::class.java)
+        return gson.fromJson(json, Any::class.java)
     }
     @TypeConverter
     fun toClass(value: String?): Class<*>? {
         return try {
-            Class.forName(value)
+            value?.let { Class.forName(it) }
         } catch (e: ClassNotFoundException) {
             null
         }
@@ -109,4 +113,6 @@ class Converters {
     fun fromClass(value: Class<*>?): String? {
         return value?.name
     }
+
+
 }

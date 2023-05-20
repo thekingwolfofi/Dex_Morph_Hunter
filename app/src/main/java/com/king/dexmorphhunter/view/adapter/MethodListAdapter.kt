@@ -48,7 +48,6 @@ class MethodListAdapter @Inject constructor() : RecyclerView.Adapter<MethodListA
         }
     }
 
-
     inner class MethodListItem(val classInfo: ClassInfo, val methodInfo: MethodInfo)
 
     override fun onItemDismiss(position: Int) {
