@@ -21,8 +21,6 @@ class MethodSelectViewModel( var context: Context, var appRepository: AppReposit
     val methodList: LiveData<List<MethodInfo>>
         get() = _methodList
 
-    //private var isFiltred: Boolean = true
-
     suspend fun getMethodList(classInfo: ClassInfo) {
         val methodList = appRepository.getMethodList(classInfo)
         _methodList.postValue(methodList)
@@ -37,6 +35,10 @@ class MethodSelectViewModel( var context: Context, var appRepository: AppReposit
         appRepository.setFilterClass()
         getClassList(packageName)
 
+    }
+
+    suspend fun updateMethodIsIntercepted(className: String, methodName: String, check: Boolean) {
+        appRepository.updateMethodIsIntercepted(className, methodName, check)
     }
 
 }

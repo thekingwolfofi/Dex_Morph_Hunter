@@ -21,7 +21,7 @@ import kotlinx.coroutines.*
 import javax.inject.Inject
 
 
-@Suppress("NAME_SHADOWING")
+@Suppress("NAME_SHADOWING", "SameParameterValue")
 @AndroidEntryPoint
 class MethodSelectActivity : AppCompatActivity() {
 
@@ -40,16 +40,14 @@ class MethodSelectActivity : AppCompatActivity() {
     private var classSpinnerOptions: List<String> = emptyList()
     private var methodSpinnerOptions: List<String> = emptyList()
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val intent = intent
         if (intent != null) {
             packageName  = intent.getStringExtra("packageName").toString()
-        } else {
-            // Tratar o caso em que o Intent é nulo
         }
+
         // Carrega a lista de aplicativos
         loadClasses()
 
@@ -80,8 +78,6 @@ class MethodSelectActivity : AppCompatActivity() {
             binding.methodSpinner.adapter = ArrayAdapter(this, R.layout.simple_spinner_dropdown_item, methodSpinnerOptions)
         }
 
-
-
     }
     private fun bindingSetup(){
 
@@ -108,8 +104,18 @@ class MethodSelectActivity : AppCompatActivity() {
         }
 
         binding.addArgumentButton.setOnClickListener {
-            //viewModel.addToSelectedList(className, methodName)
-            adapter.addItem(classInfo, methodInfo)
+            updateMethodIsIntercepted(true)
+            val method =
+                MethodInfo(
+                    methodInfo.methodName,
+                    methodInfo.packageName,
+                    methodInfo.className,
+                    true,
+                    methodInfo.methodReturnType,
+                    methodInfo.methodReturnValue,
+                    methodInfo.newMethodReturnValue
+                )
+            adapter.addItem(classInfo, method)
         }
 
         binding.classesSpinner.onItemSelectedListener = object :
@@ -166,6 +172,14 @@ class MethodSelectActivity : AppCompatActivity() {
                 viewModel.getMethodList(classInfo)
             }
             binding.progressBar.visibility = View.GONE
+        }
+    }
+
+    private fun updateMethodIsIntercepted(check: Boolean) {
+        val job = Job()
+        val scope = CoroutineScope(Dispatchers.Main + job)
+        scope.launch {
+            viewModel.updateMethodIsIntercepted(methodInfo.className, methodInfo.methodName, check)
         }
     }
 

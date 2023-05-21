@@ -11,6 +11,8 @@ data class MethodInfo(
     val packageName: String,
     @ColumnInfo(name = "class_name")
     val className: String,
+    @ColumnInfo(name = "is_intercepted_method")
+    val isInterceptedMethod: Boolean = false,
     @ColumnInfo(name = "method_return_type")
     val methodReturnType: Class<*>? = null,
     @ColumnInfo(name = "method_return_value")

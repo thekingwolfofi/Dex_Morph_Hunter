@@ -140,7 +140,13 @@ class AppRepository @Inject constructor(
                 listOf(MethodInfo("Xposed não encontrado", classInfo.packageName, classInfo.className))
             } else {
                 val methodInfoList = methodList.map { method ->
-                    MethodInfo(method.name, classInfo.packageName, classInfo.className, method.returnType)
+                    MethodInfo(
+                        method.name,
+                        classInfo.packageName,
+                        classInfo.className,
+                        isInterceptedMethod = false,
+                        method.returnType,
+                    )
                 }
                 updateMethods(methodInfoList)
                 methodInfoList
@@ -218,6 +224,9 @@ class AppRepository @Inject constructor(
             appSettingsDao.insertOrUpdateAppSettings(appSettings)
     }
 
+    suspend fun updateMethodIsIntercepted(className: String, methodName: String, check: Boolean) = withContext(Dispatchers.IO) {
+        methodInfoDao.updateIsInterceptedByClassNameAndMethodName(className, methodName, check)
 
+    }
 
 }
