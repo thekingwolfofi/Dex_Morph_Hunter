@@ -12,6 +12,8 @@ import java.lang.reflect.Method
 
 object PackageFinderUtils {
 
+    private const val testMode = true
+
     // Este método retorna uma lista de nomes de classe para o packagename determinado
     fun getListClassesInPackage(context: Context, packageName: String): List<String> {
         // Lista de classes que serão retornadas pela função
@@ -67,12 +69,21 @@ object PackageFinderUtils {
 
     // Este método público pode ser chamado de outras partes do código para obter a lista de nomes de método
     fun getAllMethods(className: String): List<Method> {
-        return try {
-            val clazz = XposedHelpers.findClass(className, null)
-            getMethodList(clazz)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            emptyList()
+        if (testMode){
+            val testClass = Class.forName("com.king.dexmorphhunter.model.Test")
+            val methodInstances = mutableListOf<Method>()
+            for (method in testClass.declaredMethods) {
+                methodInstances.add(method)
+            }
+            return methodInstances
+        } else {
+            return try {
+                val clazz = XposedHelpers.findClass(className, null)
+                getMethodList(clazz)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                emptyList()
+            }
         }
     }
 
