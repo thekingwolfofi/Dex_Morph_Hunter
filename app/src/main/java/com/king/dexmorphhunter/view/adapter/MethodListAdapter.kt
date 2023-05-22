@@ -1,6 +1,7 @@
 package com.king.dexmorphhunter.view.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.king.dexmorphhunter.databinding.ItemListMethodBinding
@@ -8,7 +9,7 @@ import com.king.dexmorphhunter.model.data.MethodInfo
 import com.king.dexmorphhunter.view.util.ItemTouchHelperAdapter
 import javax.inject.Inject
 
-
+@Suppress("DEPRECATION")
 class MethodListAdapter @Inject constructor() : RecyclerView.Adapter<MethodListAdapter.MethodSelectViewHolder>(), ItemTouchHelperAdapter {
 
     var swipedPosition: Int = -1
@@ -23,6 +24,12 @@ class MethodListAdapter @Inject constructor() : RecyclerView.Adapter<MethodListA
         if (!itemList.any { it.methodName == methodName }) {
             itemList.add(methodInfo)
             notifyItemInserted(itemList.size - 1)
+
+            // Verificar se o item adicionado é igual ao item em estado de exclusão
+            if (deleteConfirmationPosition != -1 && itemList[deleteConfirmationPosition] == methodInfo) {
+                deleteConfirmationPosition = -1
+                isDeleteConfirmationVisible = false
+            }
         }
     }
 
@@ -34,7 +41,18 @@ class MethodListAdapter @Inject constructor() : RecyclerView.Adapter<MethodListA
 
     override fun onBindViewHolder(holder: MethodSelectViewHolder, position: Int) {
         holder.bind(itemList[position])
+
+        // Verificar se a confirmação de exclusão deve ser exibida ou ocultada
+        if (position == deleteConfirmationPosition && isDeleteConfirmationVisible) {
+            // Mostrar confirmação de exclusão
+            holder.showDeleteConfirmation()
+        } else {
+            // Ocultar confirmação de exclusão
+            holder.hideDeleteConfirmation()
+        }
+
     }
+
 
     override fun getItemCount(): Int {
         return itemList.size
@@ -49,6 +67,31 @@ class MethodListAdapter @Inject constructor() : RecyclerView.Adapter<MethodListA
 
             }
         }
+
+        fun showDeleteConfirmation() {
+            // Exibir a confirmação de exclusão
+
+            itemBinding.deleteIcon.visibility = View.VISIBLE
+
+            itemBinding.deleteIcon.setOnClickListener {
+                // Remover o item quando a confirmação de exclusão for clicada
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    removeItem(position)
+                }
+            }
+        }
+
+        fun hideDeleteConfirmation() {
+            // Ocultar a confirmação de exclusão
+            itemBinding.deleteIcon.visibility = View.GONE
+        }
+
+        private fun removeItem(position: Int) {
+            itemList.removeAt(position)
+            notifyItemRemoved(position)
+        }
+
     }
 
     override fun onItemDismiss(position: Int) {
@@ -62,4 +105,3 @@ class MethodListAdapter @Inject constructor() : RecyclerView.Adapter<MethodListA
         // não precisa ser implementado
     }
 }
-

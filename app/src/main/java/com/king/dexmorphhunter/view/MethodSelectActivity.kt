@@ -8,12 +8,14 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.king.dexmorphhunter.databinding.ActivityMethodListSelectBinding
 import com.king.dexmorphhunter.model.data.ClassInfo
 import com.king.dexmorphhunter.model.data.MethodInfo
 import com.king.dexmorphhunter.model.repository.AppRepository
 import com.king.dexmorphhunter.view.adapter.MethodListAdapter
+import com.king.dexmorphhunter.view.util.SwipeToDeleteCallback
 import com.king.dexmorphhunter.viewmodel.MethodSelectViewModel
 import com.king.dexmorphhunter.viewmodel.MethodSelectViewModelFactory
 import dagger.hilt.android.AndroidEntryPoint
@@ -39,6 +41,7 @@ class MethodSelectActivity : AppCompatActivity() {
 
     private var classSpinnerOptions: List<String> = emptyList()
     private var methodSpinnerOptions: List<String> = emptyList()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,12 +91,21 @@ class MethodSelectActivity : AppCompatActivity() {
     }
     private fun bindingSetup(){
 
+        val swipeToDeleteCallback = SwipeToDeleteCallback(adapter)
+        val itemTouchHelper = ItemTouchHelper(swipeToDeleteCallback)
+
         // Inicializa a view binding
         binding = ActivityMethodListSelectBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         // Inicializa o RecyclerView
         binding.methodSelectListRecyclerView.layoutManager = LinearLayoutManager(applicationContext)
+
+
+        // Anexar o ItemTouchHelper à RecyclerView
+
+        itemTouchHelper.attachToRecyclerView(binding.methodSelectListRecyclerView)
+
 
         // adiciona o adapter ao recycleview
         binding.methodSelectListRecyclerView.adapter = adapter
