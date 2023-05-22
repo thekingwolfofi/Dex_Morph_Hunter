@@ -115,7 +115,7 @@ class MethodSelectActivity : AppCompatActivity() {
                     methodInfo.methodReturnValue,
                     methodInfo.newMethodReturnValue
                 )
-            adapter.addItem(classInfo, method)
+            adapter.addItem(method)
         }
 
         binding.classesSpinner.onItemSelectedListener = object :

@@ -4,7 +4,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.king.dexmorphhunter.databinding.ItemListMethodBinding
-import com.king.dexmorphhunter.model.data.ClassInfo
 import com.king.dexmorphhunter.model.data.MethodInfo
 import com.king.dexmorphhunter.view.util.ItemTouchHelperAdapter
 import javax.inject.Inject
@@ -16,18 +15,16 @@ class MethodListAdapter @Inject constructor() : RecyclerView.Adapter<MethodListA
     var deleteConfirmationPosition: Int = -1
     var isDeleteConfirmationVisible: Boolean = false
 
-    private var itemList: MutableList<MethodListItem> = mutableListOf()
+    private var itemList: MutableList<MethodInfo> = mutableListOf()
 
-    fun addItem(classInfo: ClassInfo, methodInfo: MethodInfo) {
+    fun addItem(methodInfo: MethodInfo) {
         val methodName = methodInfo.methodName
 
-        if (!itemList.any { it.methodInfo.methodName == methodName }) {
-            itemList.add(MethodListItem(classInfo, methodInfo))
+        if (!itemList.any { it.methodName == methodName }) {
+            itemList.add(methodInfo)
             notifyItemInserted(itemList.size - 1)
         }
     }
-
-
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MethodSelectViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -45,16 +42,14 @@ class MethodListAdapter @Inject constructor() : RecyclerView.Adapter<MethodListA
 
     inner class MethodSelectViewHolder(private val itemBinding: ItemListMethodBinding) : RecyclerView.ViewHolder(itemBinding.root) {
 
-        fun bind(methodListItem: MethodListItem ) {
-            itemBinding.classNameTextView.text = methodListItem.classInfo.className
-            itemBinding.methodNameTextView.text = methodListItem.methodInfo.methodName
+        fun bind(methodInfo: MethodInfo ) {
+            itemBinding.classNameTextView.text = methodInfo.className
+            itemBinding.methodNameTextView.text = methodInfo.methodName
             itemBinding.selectButton.setOnClickListener {
 
             }
         }
     }
-
-    inner class MethodListItem(val classInfo: ClassInfo, val methodInfo: MethodInfo)
 
     override fun onItemDismiss(position: Int) {
         swipedPosition = position
