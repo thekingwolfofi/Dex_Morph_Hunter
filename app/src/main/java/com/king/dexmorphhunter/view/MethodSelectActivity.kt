@@ -76,7 +76,14 @@ class MethodSelectActivity : AppCompatActivity() {
             methodSpinnerOptions = methodList.map { it.methodName }
             binding.addArgumentButton.isEnabled = !methodList.map { it.methodName }.contains("Xposed não encontrado")
             binding.methodSpinner.adapter = ArrayAdapter(this, R.layout.simple_spinner_dropdown_item, methodSpinnerOptions)
+
+            for (methodInfo in methodList) {
+                if (methodInfo.isInterceptedMethod) {
+                    adapter.addItem(methodInfo)
+                }
+            }
         }
+
 
     }
     private fun bindingSetup(){
