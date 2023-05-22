@@ -19,9 +19,15 @@ class MethodListAdapter @Inject constructor() : RecyclerView.Adapter<MethodListA
     private var itemList: MutableList<MethodListItem> = mutableListOf()
 
     fun addItem(classInfo: ClassInfo, methodInfo: MethodInfo) {
-        itemList.add(MethodListItem(classInfo, methodInfo))
-        notifyItemInserted(itemList.size - 1)
+        val methodName = methodInfo.methodName
+
+        if (!itemList.any { it.methodInfo.methodName == methodName }) {
+            itemList.add(MethodListItem(classInfo, methodInfo))
+            notifyItemInserted(itemList.size - 1)
+        }
     }
+
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MethodSelectViewHolder {
         val inflater = LayoutInflater.from(parent.context)
