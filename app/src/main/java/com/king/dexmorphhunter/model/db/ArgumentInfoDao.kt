@@ -18,14 +18,11 @@ interface ArgumentInfoDao {
     @Delete
     suspend fun delete(argumentInfo: ArgumentInfo)
 
-    @Query("SELECT * FROM argument_info")
-    suspend fun getAll(): List<ArgumentInfo>
-
     @Query("DELETE FROM argument_info")
     suspend fun deleteAll()
 
     @Query("SELECT * FROM argument_info WHERE package_name = :packageName AND method_name = :methodName")
-    suspend fun getByPackageNameAndMethodName(packageName: String, methodName: String): List<ArgumentInfo>?
+    suspend fun getByClassNameAndMethodName(packageName: String, methodName: String): List<ArgumentInfo>?
 
 }
 

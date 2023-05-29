@@ -230,11 +230,11 @@ class AppRepository @Inject constructor(
 
     }
 
-    suspend fun getByPackageNameAndMethodName(
-        packageName: String,
+    suspend fun getByClassNameAndMethodName(
+        className: String,
         methodName: String
     ): List<ArgumentInfo>? {
-        return argumentInfoDao.getByPackageNameAndMethodName(packageName, methodName)
+        return argumentInfoDao.getByClassNameAndMethodName(className, methodName)
     }
 
     suspend fun getAllMethodList(): List<MethodInfo> {
