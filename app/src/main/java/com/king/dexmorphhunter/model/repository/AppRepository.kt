@@ -145,7 +145,8 @@ class AppRepository @Inject constructor(
                         classInfo.packageName,
                         classInfo.className,
                         isInterceptedMethod = false,
-                        method.returnType,
+                        changeReturnMethod = false,
+                        method.returnType
                     )
                 }
                 updateMethods(methodInfoList)
@@ -227,6 +228,25 @@ class AppRepository @Inject constructor(
     suspend fun updateMethodIsIntercepted(className: String, methodName: String, check: Boolean) = withContext(Dispatchers.IO) {
         methodInfoDao.updateIsInterceptedByClassNameAndMethodName(className, methodName, check)
 
+    }
+
+    suspend fun getByPackageNameAndMethodName(
+        packageName: String,
+        methodName: String
+    ): List<ArgumentInfo>? {
+        return argumentInfoDao.getByPackageNameAndMethodName(packageName, methodName)
+    }
+
+    suspend fun getAllMethodList(): List<MethodInfo> {
+        return methodInfoDao.getAll()
+    }
+
+    suspend fun setArgumentInfoList(argumentInfoList: List<ArgumentInfo>) {
+        argumentInfoDao.insertAll(argumentInfoList)
+    }
+
+    suspend fun updateMethodReturnValue(className: String, methodName: String, returnValue: Any?) {
+        methodInfoDao.updateReturnValueByClassNameAndMethodName(className, methodName, returnValue)
     }
 
 }

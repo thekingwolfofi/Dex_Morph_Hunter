@@ -1,6 +1,6 @@
 package com.king.dexmorphhunter.view.util
 
-interface ItemTouchHelperAdapter {
+interface ItemTouchHelper {
 
     fun onItemDismiss(position: Int)
     fun onItemMove(fromPosition: Int, toPosition: Int)

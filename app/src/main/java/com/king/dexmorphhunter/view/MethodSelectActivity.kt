@@ -129,7 +129,8 @@ class MethodSelectActivity : AppCompatActivity() {
                     methodInfo.methodName,
                     methodInfo.packageName,
                     methodInfo.className,
-                    true,
+                    isInterceptedMethod = true,
+                    changeReturnMethod = false,
                     methodInfo.methodReturnType,
                     methodInfo.methodReturnValue,
                     methodInfo.newMethodReturnValue

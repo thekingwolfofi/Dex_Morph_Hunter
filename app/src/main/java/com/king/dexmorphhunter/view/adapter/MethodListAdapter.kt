@@ -6,11 +6,11 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.king.dexmorphhunter.databinding.ItemListMethodBinding
 import com.king.dexmorphhunter.model.data.MethodInfo
-import com.king.dexmorphhunter.view.util.ItemTouchHelperAdapter
+import com.king.dexmorphhunter.view.util.ItemTouchHelper
 import javax.inject.Inject
 
 @Suppress("DEPRECATION")
-class MethodListAdapter @Inject constructor() : RecyclerView.Adapter<MethodListAdapter.MethodSelectViewHolder>(), ItemTouchHelperAdapter {
+class MethodListAdapter @Inject constructor() : RecyclerView.Adapter<MethodListAdapter.MethodSelectViewHolder>(), ItemTouchHelper {
 
     var swipedPosition: Int = -1
     var deleteConfirmationPosition: Int = -1

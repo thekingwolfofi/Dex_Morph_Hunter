@@ -13,6 +13,8 @@ data class MethodInfo(
     val className: String,
     @ColumnInfo(name = "is_intercepted_method")
     val isInterceptedMethod: Boolean = false,
+    @ColumnInfo(name = "change_return_method")
+    val changeReturnMethod: Boolean = false,
     @ColumnInfo(name = "method_return_type")
     val methodReturnType: Class<*>? = null,
     @ColumnInfo(name = "method_return_value")

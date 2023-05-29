@@ -33,7 +33,7 @@ class ParameterEditorActivity : AppCompatActivity() {
         val method = targetClass.methods.firstOrNull { it.name == methodName }
         if (method != null) {
             val parameters = method.parameters
-            return parameters.mapIndexed { _ , parameter ->
+            return parameters.mapIndexed { _    , parameter ->
                 val paramType = parameter.type
                 val typeName = when {
                     paramType.isArray -> paramType.componentType.simpleName + "Array"

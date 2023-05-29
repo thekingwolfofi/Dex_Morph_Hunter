@@ -21,9 +21,6 @@ interface MethodInfoDao {
     @Query("SELECT * FROM method_info")
     suspend fun getAll(): List<MethodInfo>
 
-    @Query("SELECT * FROM method_info WHERE package_name = :packageName")
-    suspend fun getByPackageName(packageName: String): List<MethodInfo>?
-
     @Query("SELECT * FROM method_info WHERE class_name = :className")
     suspend fun getByClassName(className: String): List<MethodInfo>?
 
@@ -35,6 +32,10 @@ interface MethodInfoDao {
 
     @Query("UPDATE method_info SET is_intercepted_method = :isIntercepted WHERE class_name = :className AND method_name = :methodName")
     suspend fun updateIsInterceptedByClassNameAndMethodName(className: String, methodName: String, isIntercepted: Boolean)
+
+
+    @Query("UPDATE method_info SET method_return_value = :returnValue WHERE class_name = :className AND method_name = :methodName")
+    suspend fun updateReturnValueByClassNameAndMethodName(className: String, methodName: String, returnValue: Any?)
 
 
 }
