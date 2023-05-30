@@ -8,6 +8,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.king.dexmorphhunter.databinding.ActivityMethodListSelectBinding
@@ -101,20 +102,15 @@ class MethodSelectActivity : AppCompatActivity() {
         // Inicializa o RecyclerView
         binding.methodSelectListRecyclerView.layoutManager = LinearLayoutManager(applicationContext)
 
-
         // Anexar o ItemTouchHelper à RecyclerView
-
         itemTouchHelper.attachToRecyclerView(binding.methodSelectListRecyclerView)
-
 
         // adiciona o adapter ao recycleview
         binding.methodSelectListRecyclerView.adapter = adapter
 
         binding.filterButton.setOnClickListener {
-            val job = Job()
-            val scope = CoroutineScope(Dispatchers.Main + job)
-            scope.launch {
-                binding.progressBar.visibility = View.VISIBLE
+            binding.progressBar.visibility = View.VISIBLE
+            lifecycleScope.launch {
                 withContext(Dispatchers.Default) {
                     viewModel.setFilterClass(packageName)
                 }
@@ -172,33 +168,23 @@ class MethodSelectActivity : AppCompatActivity() {
     }
 
     private fun loadClasses() {
-        val job = Job()
-        val scope = CoroutineScope(Dispatchers.Main + job)
-        scope.launch {
-            binding.progressBar.visibility = View.VISIBLE
-            withContext(Dispatchers.Default) {
-                packageName.let { viewModel.getClassList(it) }
-            }
+        binding.progressBar.visibility = View.VISIBLE
+        lifecycleScope.launch(Dispatchers.IO) {
+            packageName.let { viewModel.getClassList(it) }
             binding.progressBar.visibility = View.GONE
         }
     }
 
     private fun loadMethods() {
-        val job = Job()
-        val scope = CoroutineScope(Dispatchers.Main + job)
-        scope.launch {
-            binding.progressBar.visibility = View.VISIBLE
-            withContext(Dispatchers.Default) {
-                viewModel.getMethodList(classInfo)
-            }
+        binding.progressBar.visibility = View.VISIBLE
+        lifecycleScope.launch(Dispatchers.IO) {
+            viewModel.getMethodList(classInfo)
             binding.progressBar.visibility = View.GONE
         }
     }
 
     private fun updateMethodIsIntercepted(check: Boolean) {
-        val job = Job()
-        val scope = CoroutineScope(Dispatchers.Main + job)
-        scope.launch {
+        lifecycleScope.launch {
             viewModel.updateMethodIsIntercepted(methodInfo.className, methodInfo.methodName, check)
         }
     }

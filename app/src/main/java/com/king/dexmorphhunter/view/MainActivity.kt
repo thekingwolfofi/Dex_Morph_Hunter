@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.king.dexmorphhunter.databinding.ActivityMainBinding
 import com.king.dexmorphhunter.model.data.AppInfo
@@ -77,33 +78,23 @@ class MainActivity : AppCompatActivity() {
         binding.appListRecyclerView.adapter = adapter
         
         binding.interceptedAppsSwitch.setOnCheckedChangeListener { _, isChecked ->
-            val job = Job()
-            val scope = CoroutineScope(Dispatchers.Main + job)
-            scope.launch {
-                binding.progressBar.visibility = View.VISIBLE
-                withContext(Dispatchers.Default) {
-                    viewModel.filterInterceptedApps(isChecked)
-                }
+            binding.progressBar.visibility = View.VISIBLE
+            lifecycleScope.launch(Dispatchers.IO) {
+                viewModel.filterInterceptedApps(isChecked)
                 binding.progressBar.visibility = View.GONE
             }
         }
 
         binding.systemAppsSwitch.setOnCheckedChangeListener { _, isChecked ->
-            val job = Job()
-            val scope = CoroutineScope(Dispatchers.Main + job)
-            scope.launch {
-                binding.progressBar.visibility = View.VISIBLE
-                withContext(Dispatchers.Default) {
-                    viewModel.filterSystemApps(isChecked)
-                }
+            binding.progressBar.visibility = View.VISIBLE
+            lifecycleScope.launch(Dispatchers.IO) {
+                viewModel.filterSystemApps(isChecked)
                 binding.progressBar.visibility = View.GONE
             }
         }
 
         binding.swipeRefreshLayout.setOnRefreshListener {
-            val job = Job()
-            val scope = CoroutineScope(Dispatchers.Main + job)
-            scope.launch {
+            lifecycleScope.launch(Dispatchers.IO) {
                 binding.swipeRefreshLayout.isRefreshing = true
                 withContext(Dispatchers.Default) {
                     viewModel.invalidateCache()
@@ -115,15 +106,11 @@ class MainActivity : AppCompatActivity() {
         binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener,
             android.widget.SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                val job = Job()
-                val scope = CoroutineScope(Dispatchers.Main + job)
-                scope.launch {
-                    binding.progressBar.visibility = View.VISIBLE
-                    withContext(Dispatchers.Default) {
+                binding.progressBar.visibility = View.VISIBLE
+                lifecycleScope.launch(Dispatchers.IO) {
                         viewModel.filterQueryApps(
                             query
                         )
-                    }
                     binding.progressBar.visibility = View.GONE
                 }
                 return true
@@ -136,23 +123,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadApps() {
-        val job = Job()
-        val scope = CoroutineScope(Dispatchers.Main + job)
-        scope.launch {
-            binding.progressBar.visibility = View.VISIBLE
-            withContext(Dispatchers.Default) {
-                viewModel.getInstalledAppList()
-            }
+        binding.progressBar.visibility = View.VISIBLE
+        lifecycleScope.launch(Dispatchers.IO) {
+            viewModel.getInstalledAppList()
             binding.progressBar.visibility = View.GONE
         }
     }
 
     private fun filterApps(){
-        val job = Job()
-        val scope = CoroutineScope(Dispatchers.IO + job)
-        scope.launch {
+        binding.progressBar.visibility = View.VISIBLE
+        lifecycleScope.launch(Dispatchers.IO) {
             viewModel.updateListApps()
-
+            binding.progressBar.visibility = View.GONE
         }
     }
 
