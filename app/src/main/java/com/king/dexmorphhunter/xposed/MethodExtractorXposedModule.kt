@@ -45,7 +45,7 @@ class MethodExtractorXposedModule : IXposedHookLoadPackage {
                 XposedBridge.hookMethod(targetMethod, object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         runBlocking(Dispatchers.IO) {
-                            val argumentInfoList = getByPackageNameAndMethodName(method.className, method.methodName)
+                            val argumentInfoList = getArgumentInfoListByClassNameAndMethodName(method.className, method.methodName)
                             if (argumentInfoList == null) {
                                 val parameters = targetMethod.parameters
                                 val args = param.args
@@ -102,8 +102,8 @@ class MethodExtractorXposedModule : IXposedHookLoadPackage {
         return@withContext appRepository.getAllMethodList()
     }
 
-    private suspend fun getByPackageNameAndMethodName(className: String, methodName: String): List<ArgumentInfo>? = withContext(Dispatchers.IO) {
-        return@withContext appRepository.getByClassNameAndMethodName(className, methodName)
+    private suspend fun getArgumentInfoListByClassNameAndMethodName(className: String, methodName: String): List<ArgumentInfo>? = withContext(Dispatchers.IO) {
+        return@withContext appRepository.getArgumentInfoListByClassNameAndMethodName(className, methodName)
 
     }
 
@@ -129,5 +129,6 @@ class MethodExtractorXposedModule : IXposedHookLoadPackage {
     ) {
         appRepository.updateMethodReturnValue(className, methodName, returnValue)
     }
+    
 
 }
