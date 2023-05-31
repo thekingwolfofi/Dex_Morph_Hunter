@@ -5,13 +5,17 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.king.dexmorphhunter.App
 import com.king.dexmorphhunter.model.data.ClassInfo
 import com.king.dexmorphhunter.model.data.MethodInfo
 import com.king.dexmorphhunter.model.repository.AppRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
 @SuppressLint("StaticFieldLeak")
-class MethodSelectViewModel( var context: Context, var appRepository: AppRepository ) : ViewModel() {
-
+@HiltViewModel
+class MethodSelectViewModel @Inject constructor( var appRepository: AppRepository ) : ViewModel() {
+    var context: Context = App.instance.applicationContext
     // Aqui você pode definir variáveis para armazenar os dados da lista de classes e métodos.
     private val _classList = MutableLiveData<List<ClassInfo>>()
     val classList: LiveData<List<ClassInfo>>
@@ -24,6 +28,10 @@ class MethodSelectViewModel( var context: Context, var appRepository: AppReposit
     suspend fun getMethodList(classInfo: ClassInfo) {
         val methodList = appRepository.getMethodList(classInfo)
         _methodList.postValue(methodList)
+        val test = true
+        if (test){
+            appRepository.testArgumentInfo()
+        }
     }
 
     suspend fun getClassList(packageName: String) {

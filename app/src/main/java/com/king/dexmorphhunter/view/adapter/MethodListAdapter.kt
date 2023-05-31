@@ -1,17 +1,25 @@
 package com.king.dexmorphhunter.view.adapter
 
+import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.king.dexmorphhunter.App
 import com.king.dexmorphhunter.databinding.ItemListMethodBinding
 import com.king.dexmorphhunter.model.data.MethodInfo
+import com.king.dexmorphhunter.view.ParameterEditorActivity
 import com.king.dexmorphhunter.view.util.ItemTouchHelper
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
+import javax.inject.Singleton
 
 @Suppress("DEPRECATION")
+@Singleton
 class MethodListAdapter @Inject constructor() : RecyclerView.Adapter<MethodListAdapter.MethodSelectViewHolder>(), ItemTouchHelper {
 
+    private val context: Context = App.instance.applicationContext
     var swipedPosition: Int = -1
     var deleteConfirmationPosition: Int = -1
     var isDeleteConfirmationVisible: Boolean = false
@@ -60,12 +68,19 @@ class MethodListAdapter @Inject constructor() : RecyclerView.Adapter<MethodListA
 
     inner class MethodSelectViewHolder(private val itemBinding: ItemListMethodBinding) : RecyclerView.ViewHolder(itemBinding.root) {
 
-        fun bind(methodInfo: MethodInfo ) {
+        fun bind(methodInfo: MethodInfo) {
             itemBinding.classNameTextView.text = methodInfo.className
             itemBinding.methodNameTextView.text = methodInfo.methodName
             itemBinding.selectButton.setOnClickListener {
 
+                val intent = Intent(context, ParameterEditorActivity::class.java)
+                intent.putExtra("className", methodInfo.className)
+                intent.putExtra("methodName", methodInfo.methodName)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                context.startActivity(intent)
+
             }
+
         }
 
         fun showDeleteConfirmation() {
@@ -104,4 +119,5 @@ class MethodListAdapter @Inject constructor() : RecyclerView.Adapter<MethodListA
     override fun onItemMove(fromPosition: Int, toPosition: Int) {
         // não precisa ser implementado
     }
+
 }

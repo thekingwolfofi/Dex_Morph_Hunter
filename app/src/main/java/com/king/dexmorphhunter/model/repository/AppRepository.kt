@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import androidx.lifecycle.ViewModel
+import com.king.dexmorphhunter.App
 import com.king.dexmorphhunter.model.data.*
 import com.king.dexmorphhunter.model.db.*
 import com.king.dexmorphhunter.model.util.Constants
@@ -21,9 +22,10 @@ import javax.inject.Inject
 @SuppressLint("StaticFieldLeak")
 @HiltViewModel
 class AppRepository @Inject constructor(
-    val context: Context,
     appDatabase: AppDatabase
 ) : ViewModel() {
+
+    private val context: Context = App.instance.applicationContext
 
     private var appSettingsDao: AppSettingsDao = appDatabase.appSettingsDao()
     private var appInfoDao: AppInfoDao = appDatabase.appInfoDao()
@@ -230,7 +232,7 @@ class AppRepository @Inject constructor(
 
     }
 
-    suspend fun getByClassNameAndMethodName(
+    suspend fun getArgumentInfoListByClassNameAndMethodName(
         className: String,
         methodName: String
     ): List<ArgumentInfo>? {
@@ -243,10 +245,25 @@ class AppRepository @Inject constructor(
 
     suspend fun setArgumentInfoList(argumentInfoList: List<ArgumentInfo>) {
         argumentInfoDao.insertAll(argumentInfoList)
+
+    }
+
+    suspend fun testArgumentInfo(){
+        val packageFinderUtils = PackageFinderUtils
+        val list = packageFinderUtils.getTestArgumentInfo()
+        argumentInfoDao.insertAll(list)
+
     }
 
     suspend fun updateMethodReturnValue(className: String, methodName: String, returnValue: Any?) {
         methodInfoDao.updateReturnValueByClassNameAndMethodName(className, methodName, returnValue)
     }
 
+    suspend fun getMethodInfo(className: String, methodName: String): MethodInfo? {
+        return methodInfoDao.getByClassNameAndMethodName(className, methodName)
+    }
+
+    suspend fun updateChangeReturn(className: String, methodName:String, changeReturnMethod:Boolean){
+        methodInfoDao.updateChangeReturnByClassNameAndMethodName(className, methodName, changeReturnMethod)
+    }
 }

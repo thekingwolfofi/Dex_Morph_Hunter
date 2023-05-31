@@ -8,19 +8,23 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.king.dexmorphhunter.App
 import com.king.dexmorphhunter.databinding.ItemAppBinding
 import com.king.dexmorphhunter.model.data.AppInfo
 import com.king.dexmorphhunter.model.util.Constants.removePackage
 import com.king.dexmorphhunter.view.MethodSelectActivity
 import com.king.dexmorphhunter.viewmodel.AppListViewModel
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class AppListAdapter @Inject constructor(
-    val context: Context,
     val appListViewModel: AppListViewModel,
     var updateIsIntercepted: ((packageName: String, isIntercepted: Boolean) -> Unit),
     var getBitmapFromPackage: ((packageName: String) -> Bitmap?)
 ) : RecyclerView.Adapter<AppListAdapter.AppListViewHolder>() {
+
+    private val context: Context = App.instance.applicationContext
 
     private var appList: List<AppInfo> = emptyList()
 

@@ -1,19 +1,20 @@
 package com.king.dexmorphhunter.view.adapter
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.king.dexmorphhunter.databinding.ItemParameterListBinding
 import com.king.dexmorphhunter.model.data.ArgumentInfo
-import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class ArgumentsListAdapter @Inject constructor(
-        private val argumentList: List<ArgumentInfo>
     ) : RecyclerView.Adapter<ArgumentsListAdapter.ViewHolder>() {
 
+    private lateinit var argumentList: List<ArgumentInfo>
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemParameterListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding)
@@ -24,7 +25,19 @@ class ArgumentsListAdapter @Inject constructor(
         holder.bind(argument)
     }
 
-    override fun getItemCount() = argumentList.size
+    override fun getItemCount(): Int {
+        return if (::argumentList.isInitialized) {
+            argumentList.size
+        } else {
+            0
+        }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun setArgumentList(argumentList: List<ArgumentInfo>) {
+        this.argumentList = argumentList
+        notifyDataSetChanged()
+    }
 
     class ViewHolder(private val binding: ItemParameterListBinding) : RecyclerView.ViewHolder(binding.root) {
 
@@ -75,10 +88,9 @@ class ArgumentsListAdapter @Inject constructor(
                 else -> {
                 binding.argumentValueListButton.visibility = View.VISIBLE
                 binding.argumentValueListButton.setOnClickListener {
-                    // Lógica para lidar com o tipo de objeto customizado aqui
+                        // Lógica para lidar com o tipo de objeto customizado aqui
+                    }
                 }
-            }
-
             }
         }
     }

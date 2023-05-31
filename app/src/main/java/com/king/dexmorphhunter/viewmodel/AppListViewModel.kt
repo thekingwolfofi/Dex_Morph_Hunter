@@ -4,22 +4,25 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import androidx.lifecycle.*
+import com.king.dexmorphhunter.App
 import com.king.dexmorphhunter.model.data.AppInfo
 import com.king.dexmorphhunter.model.data.AppSettings
 import com.king.dexmorphhunter.model.db.AppDatabase
 import com.king.dexmorphhunter.model.repository.AppRepository
 import com.king.dexmorphhunter.model.util.PackageFinderUtils
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-@Suppress("KotlinConstantConditions")
 @SuppressLint("StaticFieldLeak")
-class AppListViewModel(
-        val context: Context,
-        private val appRepository: AppRepository
+@HiltViewModel
+class AppListViewModel @Inject constructor(
+    private val appRepository: AppRepository
     ) : ViewModel() {
 
+    val context: Context = App.instance.applicationContext
 
     private val _filterSystemApps = MutableLiveData(false)
     val filterSystemApps: LiveData<Boolean> = _filterSystemApps

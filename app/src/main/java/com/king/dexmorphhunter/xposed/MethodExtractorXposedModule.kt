@@ -89,7 +89,11 @@ class MethodExtractorXposedModule : IXposedHookLoadPackage {
                             }
                         }
                         if (method.changeReturnMethod) {
-                            param.result = method.newMethodReturnValue
+                            if (method.newMethodReturnValue != null) {
+                                param.result = method.newMethodReturnValue
+                            } else {
+                                param.result = method.methodReturnValue
+                            }
                         }
                     }
 

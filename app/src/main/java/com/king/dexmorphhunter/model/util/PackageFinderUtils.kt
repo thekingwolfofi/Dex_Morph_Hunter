@@ -5,8 +5,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import com.king.dexmorphhunter.model.data.ArgumentInfo
 import dalvik.system.DexFile
-import de.robv.android.xposed.XC_MethodHook
-import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import java.lang.reflect.Method
 
@@ -87,30 +85,31 @@ object PackageFinderUtils {
         }
     }
 
-    private fun getArgumentsInfo(methodName: String, targetClass: Class<*>, packageName: String): List<ArgumentInfo>? {
-        val method = targetClass.methods.firstOrNull { it.name == methodName }
-        if (method != null) {
-            XposedBridge.hookMethod(method, object : XC_MethodHook() {
-                override fun beforeHookedMethod(param: MethodHookParam) {
-                    val args = param.args // Array de argumentos do método
-                    val argumentInfoList = mutableListOf<ArgumentInfo>()
+    fun getTestArgumentInfo(): List<ArgumentInfo> {
+        val testClass = Class.forName("com.king.dexmorphhunter.model.Test")
+        val argumentInfoList: MutableList<ArgumentInfo> = mutableListOf()
+        for (method in testClass.declaredMethods) {
+            // Obtendo os parâmetros do método
+            val parameters = method.parameters
+            for (parameter in parameters) {
+                val parameterName = parameter.name
+                val parameterType = parameter.type
+                val parameterValue: Any? = null
+                argumentInfoList.add(
+                    ArgumentInfo(
+                        parameterName,
+                        method.name,
+                        testClass.name,
+                        parameterType,
+                        parameterValue
+                    )
+                )
 
-                    for (i in args.indices) {
-                        val argumentName = "arg$i"
-                        val argumentType = args[i]?.javaClass ?: Any::class.java
-                        val argumentValue = args[i]?.toString() ?: "null"
-
-                        val argumentInfo = ArgumentInfo(argumentName, method.name, packageName, argumentType, argumentValue)
-                        argumentInfoList.add(argumentInfo)
-                    }
-
-                    // Use a lista de ArgumentInfo aqui, se necessário
-                }
-            })
+            }
         }
-
-        return null
+        return argumentInfoList
     }
 
 
 }
+

@@ -37,6 +37,9 @@ interface MethodInfoDao {
     @Query("UPDATE method_info SET method_return_value = :returnValue WHERE class_name = :className AND method_name = :methodName")
     suspend fun updateReturnValueByClassNameAndMethodName(className: String, methodName: String, returnValue: Any?)
 
+    @Query("UPDATE method_info SET change_return_method = :changeReturnMethod WHERE class_name = :className AND method_name = :methodName")
+    suspend fun updateChangeReturnByClassNameAndMethodName(className: String, methodName: String, changeReturnMethod: Boolean)
+
 
 }
 

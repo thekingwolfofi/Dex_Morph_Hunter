@@ -6,31 +6,30 @@ import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.king.dexmorphhunter.databinding.ActivityMethodListSelectBinding
 import com.king.dexmorphhunter.model.data.ClassInfo
 import com.king.dexmorphhunter.model.data.MethodInfo
-import com.king.dexmorphhunter.model.repository.AppRepository
 import com.king.dexmorphhunter.view.adapter.MethodListAdapter
 import com.king.dexmorphhunter.view.util.SwipeToDeleteCallback
 import com.king.dexmorphhunter.viewmodel.MethodSelectViewModel
-import com.king.dexmorphhunter.viewmodel.MethodSelectViewModelFactory
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import javax.inject.Inject
-
 
 @Suppress("NAME_SHADOWING", "SameParameterValue")
 @AndroidEntryPoint
 class MethodSelectActivity : AppCompatActivity() {
 
-    @Inject lateinit var viewModel: MethodSelectViewModel
-    @Inject lateinit var adapter: MethodListAdapter
-    @Inject lateinit var appRepository: AppRepository
+    private val viewModel: MethodSelectViewModel by viewModels()
+
+    @Inject
+    lateinit var adapter: MethodListAdapter
+
     private lateinit var binding: ActivityMethodListSelectBinding
 
     private var classList: List<ClassInfo> = emptyList()
@@ -43,105 +42,58 @@ class MethodSelectActivity : AppCompatActivity() {
     private var classSpinnerOptions: List<String> = emptyList()
     private var methodSpinnerOptions: List<String> = emptyList()
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val intent = intent
-        if (intent != null) {
-            packageName  = intent.getStringExtra("packageName").toString()
-        }
-
-        // Carrega a lista de aplicativos
-        loadClasses()
-
-        viewModelSetup()
-
-        bindingSetup()
-
-    }
-
-    private fun viewModelSetup(){
-
-        // Inicializa o ViewModel
-        val viewModelFactory = MethodSelectViewModelFactory(applicationContext, appRepository)
-        viewModel = ViewModelProvider(this, viewModelFactory)[MethodSelectViewModel::class.java]
-
-        // Observe as mudanças na lista de Classes
-        viewModel.classList.observe(this) { newList ->
-            classList = newList ?: emptyList()
-            classSpinnerOptions = classList.map { it.className }
-            binding.classesSpinner.adapter = ArrayAdapter(this, R.layout.simple_spinner_dropdown_item, classSpinnerOptions)
-        }
-
-        // Observe as mudanças na lista de Metodos
-        viewModel.methodList.observe(this) { newList ->
-            methodList = newList ?: emptyList()
-            methodSpinnerOptions = methodList.map { it.methodName }
-            binding.addArgumentButton.isEnabled = !methodList.map { it.methodName }.contains("Xposed não encontrado")
-            binding.methodSpinner.adapter = ArrayAdapter(this, R.layout.simple_spinner_dropdown_item, methodSpinnerOptions)
-
-            for (methodInfo in methodList) {
-                if (methodInfo.isInterceptedMethod) {
-                    adapter.addItem(methodInfo)
-                }
-            }
-        }
-
-
-    }
-    private fun bindingSetup(){
-
-        val swipeToDeleteCallback = SwipeToDeleteCallback(adapter)
-        val itemTouchHelper = ItemTouchHelper(swipeToDeleteCallback)
-
-        // Inicializa a view binding
         binding = ActivityMethodListSelectBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Inicializa o RecyclerView
+        val intent = intent
+        if (intent != null) {
+            packageName = intent.getStringExtra("packageName").toString()
+        }
+
+        initViews()
+        initViewModel()
+        loadClasses()
+    }
+
+    private fun initViews() {
         binding.methodSelectListRecyclerView.layoutManager = LinearLayoutManager(applicationContext)
-
-        // Anexar o ItemTouchHelper à RecyclerView
-        itemTouchHelper.attachToRecyclerView(binding.methodSelectListRecyclerView)
-
-        // adiciona o adapter ao recycleview
         binding.methodSelectListRecyclerView.adapter = adapter
+
+        val swipeToDeleteCallback = SwipeToDeleteCallback(adapter)
+        val itemTouchHelper = ItemTouchHelper(swipeToDeleteCallback)
+        itemTouchHelper.attachToRecyclerView(binding.methodSelectListRecyclerView)
 
         binding.filterButton.setOnClickListener {
             binding.progressBar.visibility = View.VISIBLE
             lifecycleScope.launch {
-                withContext(Dispatchers.Default) {
+                withContext(Dispatchers.IO) {
                     viewModel.setFilterClass(packageName)
                 }
-                binding.progressBar.visibility = View.GONE
+                withContext(Dispatchers.Main) {
+                    binding.progressBar.visibility = View.GONE
+                }
             }
         }
 
         binding.addArgumentButton.setOnClickListener {
             updateMethodIsIntercepted(true)
-            val method =
-                MethodInfo(
-                    methodInfo.methodName,
-                    methodInfo.packageName,
-                    methodInfo.className,
-                    isInterceptedMethod = true,
-                    changeReturnMethod = false,
-                    methodInfo.methodReturnType,
-                    methodInfo.methodReturnValue,
-                    methodInfo.newMethodReturnValue
-                )
+            val method = MethodInfo(
+                methodInfo.methodName,
+                methodInfo.packageName,
+                methodInfo.className,
+                isInterceptedMethod = true,
+                changeReturnMethod = false,
+                methodInfo.methodReturnType,
+                methodInfo.methodReturnValue,
+                methodInfo.newMethodReturnValue
+            )
             adapter.addItem(method)
         }
 
-        binding.classesSpinner.onItemSelectedListener = object :
-            AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View,
-                position: Int,
-                id: Long
-            ) {
+        binding.classesSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
                 classInfo = classList[position]
                 loadMethods()
             }
@@ -149,14 +101,8 @@ class MethodSelectActivity : AppCompatActivity() {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
-        binding.methodSpinner.onItemSelectedListener = object :
-            AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View,
-                position: Int,
-                id: Long
-            ) {
+        binding.methodSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
                 methodInfo = methodList[position]
             }
 
@@ -164,14 +110,45 @@ class MethodSelectActivity : AppCompatActivity() {
         }
 
         binding.titleTextView.text = packageName
+    }
 
+    private fun initViewModel() {
+        viewModel.classList.observe(this) { newList ->
+            classList = newList ?: emptyList()
+            classSpinnerOptions = classList.map { it.className }
+            binding.classesSpinner.adapter = ArrayAdapter(
+                this,
+                R.layout.simple_spinner_dropdown_item,
+                classSpinnerOptions
+            )
+        }
+
+        viewModel.methodList.observe(this) { newList ->
+            methodList = newList ?: emptyList()
+            methodSpinnerOptions = methodList.map { it.methodName }
+            binding.addArgumentButton.isEnabled =
+                !methodList.map { it.methodName }.contains("Xposed não encontrado")
+            binding.methodSpinner.adapter = ArrayAdapter(
+                this,
+                R.layout.simple_spinner_dropdown_item,
+                methodSpinnerOptions
+            )
+
+            for (methodInfo in methodList) {
+                if (methodInfo.isInterceptedMethod) {
+                    adapter.addItem(methodInfo)
+                }
+            }
+        }
     }
 
     private fun loadClasses() {
         binding.progressBar.visibility = View.VISIBLE
         lifecycleScope.launch(Dispatchers.IO) {
             packageName.let { viewModel.getClassList(it) }
-            binding.progressBar.visibility = View.GONE
+            withContext(Dispatchers.Main) {
+                binding.progressBar.visibility = View.GONE
+            }
         }
     }
 
@@ -179,7 +156,9 @@ class MethodSelectActivity : AppCompatActivity() {
         binding.progressBar.visibility = View.VISIBLE
         lifecycleScope.launch(Dispatchers.IO) {
             viewModel.getMethodList(classInfo)
-            binding.progressBar.visibility = View.GONE
+            withContext(Dispatchers.Main) {
+                binding.progressBar.visibility = View.GONE
+            }
         }
     }
 
@@ -188,6 +167,4 @@ class MethodSelectActivity : AppCompatActivity() {
             viewModel.updateMethodIsIntercepted(methodInfo.className, methodInfo.methodName, check)
         }
     }
-
 }
-
